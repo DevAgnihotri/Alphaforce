@@ -2,82 +2,56 @@
 
 import { NextResponse } from 'next/server';
 import { clients, getDaysSinceContact } from '@/data/mockData';
+import { calculateTaskPriority } from '@/lib/mlScoring';
 
 interface Task {
   id: string;
-  clientId: string;
-  clientName: string;
-  email: string;
+  client_id: string;
+  client_name: string;
+  client_email: string;
   priority: 'high' | 'medium' | 'low';
-  daysSinceContact: number;
+  days_since_contact: number;
   reason: string;
-  recommendedAction: string;
-  conversionProbability: number;
-  riskProfile: string;
-}
-
-function getPriority(daysSinceContact: number, probability: number): 'high' | 'medium' | 'low' {
-  if (daysSinceContact > 14 || probability > 75) return 'high';
-  if (daysSinceContact > 7 || probability > 50) return 'medium';
-  return 'low';
-}
-
-function getReason(daysSinceContact: number, probability: number, riskProfile: string): string {
-  const reasons: string[] = [];
-  
-  if (daysSinceContact > 14) reasons.push('No contact in 14+ days');
-  else if (daysSinceContact > 7) reasons.push('No contact in 7+ days');
-  
-  if (probability > 75) reasons.push('High conversion probability');
-  else if (probability > 50) reasons.push('Moderate conversion probability');
-  
-  if (riskProfile === 'high') reasons.push('High-risk portfolio');
-  
-  return reasons.length > 0 ? reasons.join(', ') : 'Regular follow-up';
-}
-
-function getRecommendedAction(preferredContact: string, daysSinceContact: number): string {
-  if (daysSinceContact > 14) {
-    return preferredContact === 'meeting' 
-      ? 'Schedule urgent meeting' 
-      : `Send urgent ${preferredContact}`;
-  }
-  
-  switch (preferredContact) {
-    case 'phone': return 'Schedule a call';
-    case 'meeting': return 'Request a meeting';
-    default: return 'Send follow-up email';
-  }
+  recommended_action: string;
+  conversion_probability: number;
+  risk_profile: string;
+  lifecycle_stage: string;
+  portfolio_value: number;
 }
 
 export async function GET() {
   try {
-    // Generate tasks from clients
+    // Generate tasks from clients using ML scoring
     const tasks: Task[] = clients.map(client => {
       const daysSinceContact = getDaysSinceContact(client.last_contact);
-      const priority = getPriority(daysSinceContact, client.conversion_probability);
+      const priorityResult = calculateTaskPriority(client, daysSinceContact);
       
       return {
         id: `task_${client.id}`,
-        clientId: client.id,
-        clientName: client.name,
-        email: client.email,
-        priority,
-        daysSinceContact,
-        reason: getReason(daysSinceContact, client.conversion_probability, client.risk_profile),
-        recommendedAction: getRecommendedAction(client.preferred_contact, daysSinceContact),
-        conversionProbability: client.conversion_probability,
-        riskProfile: client.risk_profile,
+        client_id: client.id,
+        client_name: client.name,
+        client_email: client.email,
+        priority: priorityResult.priority,
+        days_since_contact: daysSinceContact,
+        reason: priorityResult.reason,
+        recommended_action: priorityResult.recommended_action,
+        conversion_probability: client.conversion_probability,
+        risk_profile: client.risk_profile,
+        lifecycle_stage: client.lifecycle_stage,
+        portfolio_value: client.portfolio_value,
       };
     });
 
-    // Sort by priority (high first), then by days since contact (desc)
+    // Sort by priority (high first), then by conversion probability (desc), then by days since contact (desc)
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     tasks.sort((a, b) => {
       if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
         return priorityOrder[a.priority] - priorityOrder[b.priority];
       }
-      return b.daysSinceContact - a.daysSinceContact;
+      if (b.conversion_probability !== a.conversion_probability) {
+        return b.conversion_probability - a.conversion_probability;
+      }
+      return b.days_since_contact - a.days_since_contact;
     });
 
     return NextResponse.json({
@@ -85,7 +59,7 @@ export async function GET() {
       data: tasks,
       count: tasks.length,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch tasks' },
       { status: 500 }
