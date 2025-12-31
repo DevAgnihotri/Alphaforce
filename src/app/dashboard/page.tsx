@@ -3,6 +3,7 @@
 import { Header } from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
@@ -20,7 +21,11 @@ import {
   Target,
   AlertTriangle,
   Clock,
-  UserX
+  UserX,
+  ArrowRight,
+  BarChart3,
+  Activity,
+  Eye,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { 
@@ -30,7 +35,10 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import Link from 'next/link';
 
@@ -67,6 +75,16 @@ interface DashboardData {
   monthlyPerformance: {
     month: string;
     aum: number;
+  }[];
+  lifecycleDistribution: {
+    name: string;
+    value: number;
+    color: string;
+  }[];
+  riskDistribution: {
+    name: string;
+    value: number;
+    color: string;
   }[];
 }
 
@@ -197,37 +215,89 @@ export default function DashboardPage() {
         </div>
 
         {/* Alerts */}
-        {(data.alerts.inactiveClients > 0 || data.alerts.urgentFollowups > 0) && (
+        {(data.alerts.inactiveClients > 0 || data.alerts.urgentFollowups > 0 || data.alerts.highRiskClients > 0) && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {data.alerts.urgentFollowups > 0 && (
-              <Alert>
-                <Clock className="h-4 w-4" />
-                <AlertTitle>Urgent Follow-ups</AlertTitle>
-                <AlertDescription>
-                  {data.alerts.urgentFollowups} clients haven&apos;t been contacted in 14+ days
-                </AlertDescription>
+              <Alert className="flex items-start justify-between">
+                <div className="flex gap-3">
+                  <Clock className="h-4 w-4 mt-0.5 text-yellow-600" />
+                  <div>
+                    <AlertTitle className="text-yellow-800">Urgent Follow-ups</AlertTitle>
+                    <AlertDescription className="text-yellow-700">
+                      {data.alerts.urgentFollowups} clients haven&apos;t been contacted in 14+ days
+                    </AlertDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
+                  <Link href="/tasks">
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Link>
+                </Button>
               </Alert>
             )}
             {data.alerts.inactiveClients > 0 && (
-              <Alert>
-                <UserX className="h-4 w-4" />
-                <AlertTitle>Inactive Clients</AlertTitle>
-                <AlertDescription>
-                  {data.alerts.inactiveClients} clients inactive for 30+ days
-                </AlertDescription>
+              <Alert className="flex items-start justify-between">
+                <div className="flex gap-3">
+                  <UserX className="h-4 w-4 mt-0.5 text-red-600" />
+                  <div>
+                    <AlertTitle className="text-red-800">Inactive Clients</AlertTitle>
+                    <AlertDescription className="text-red-700">
+                      {data.alerts.inactiveClients} clients inactive for 30+ days
+                    </AlertDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
+                  <Link href="/clients">
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Link>
+                </Button>
               </Alert>
             )}
             {data.alerts.highRiskClients > 0 && (
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>High-Risk Portfolios</AlertTitle>
-                <AlertDescription>
-                  {data.alerts.highRiskClients} clients with high-risk profiles
-                </AlertDescription>
+              <Alert className="flex items-start justify-between">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 text-orange-600" />
+                  <div>
+                    <AlertTitle className="text-orange-800">High-Risk Portfolios</AlertTitle>
+                    <AlertDescription className="text-orange-700">
+                      {data.alerts.highRiskClients} clients with high-risk profiles
+                    </AlertDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
+                  <Link href="/clients">
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Link>
+                </Button>
               </Alert>
             )}
           </div>
         )}
+
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href="/clients">
+              <Users className="h-4 w-4 mr-2" />
+              View All Clients
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/tasks">
+              <Activity className="h-4 w-4 mr-2" />
+              Today&apos;s Tasks
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/analytics">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </Link>
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Portfolio Performance Chart */}
@@ -267,7 +337,15 @@ export default function DashboardPage() {
           {/* Top Opportunities */}
           <Card>
             <CardHeader>
-              <CardTitle>Top Opportunities</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Top Opportunities</CardTitle>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/clients">
+                    View All
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -299,6 +377,93 @@ export default function DashboardPage() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Distribution Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Lifecycle Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Lifecycle Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.lifecycleDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                      labelLine={false}
+                    >
+                      {data.lifecycleDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {data.lifecycleDistribution.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-gray-600">{item.name} ({item.value})</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risk Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Portfolio Risk Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.riskDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                      labelLine={false}
+                    >
+                      {data.riskDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {data.riskDistribution.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm text-gray-600">{item.name} ({item.value})</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>

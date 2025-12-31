@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { activities, Activity, clients } from '@/data/mockData';
 
 // In-memory store (for demo)
-let activitiesStore = [...activities];
+const activitiesStore = [...activities];
 
 export async function GET() {
   try {

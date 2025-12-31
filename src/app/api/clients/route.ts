@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clients, Account } from '@/data/mockData';
 
 // In-memory store (for demo - in production use a real database)
-let clientsStore = [...clients];
+const clientsStore = [...clients];
 
 export async function GET() {
   try {

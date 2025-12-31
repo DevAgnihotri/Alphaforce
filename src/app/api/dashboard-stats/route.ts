@@ -88,6 +88,21 @@ export async function GET() {
       { month: 'Dec', aum: totalAUM },
     ];
 
+    // Formatted lifecycle distribution for pie chart
+    const lifecycleChartData = [
+      { name: 'Lead', value: lifecycleDistribution.lead, color: '#6b7280' },
+      { name: 'Qualified', value: lifecycleDistribution.qualified, color: '#3b82f6' },
+      { name: 'Opportunity', value: lifecycleDistribution.opportunity, color: '#f59e0b' },
+      { name: 'Customer', value: lifecycleDistribution.customer, color: '#10b981' },
+    ].filter(item => item.value > 0);
+
+    // Formatted risk distribution for pie chart
+    const riskChartData = [
+      { name: 'Low Risk', value: riskDistribution.low, color: '#10b981' },
+      { name: 'Medium Risk', value: riskDistribution.medium, color: '#f59e0b' },
+      { name: 'High Risk', value: riskDistribution.high, color: '#ef4444' },
+    ].filter(item => item.value > 0);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -110,10 +125,12 @@ export async function GET() {
           risk: riskDistribution,
           activityType: activityByType,
         },
+        lifecycleDistribution: lifecycleChartData,
+        riskDistribution: riskChartData,
         monthlyPerformance,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch dashboard stats' },
       { status: 500 }

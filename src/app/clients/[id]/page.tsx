@@ -45,11 +45,11 @@ import {
   TrendingUp,
   Target,
   MessageSquare,
-  FileText,
   RefreshCw,
   Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ExportSummaryButton } from '@/components/ExportSummaryButton';
 
 interface ClientDetail {
   id: string;
@@ -474,10 +474,27 @@ export default function ClientDetailPage() {
             Generate Predictions
           </Button>
 
-          <Button variant="outline">
-            <FileText className="h-4 w-4 mr-2" />
-            Export PDF
-          </Button>
+          <ExportSummaryButton 
+            client={{
+              id: client.id,
+              name: client.name,
+              email: client.email,
+              phone: client.phone,
+              age: client.age,
+              income: client.income,
+              risk_profile: client.risk_profile,
+              portfolio_value: client.portfolio_value,
+              total_investments: client.total_investments,
+              conversion_probability: client.conversion_probability,
+              interests: client.interests,
+              last_contact: client.last_contact,
+              daysSinceContact: client.daysSinceContact,
+              lifecycle_stage: client.lifecycle_stage,
+              activities: client.activities,
+              portfolio: client.portfolio,
+            }}
+            predictions={predictions}
+          />
         </div>
 
         {/* Main Content Tabs */}
