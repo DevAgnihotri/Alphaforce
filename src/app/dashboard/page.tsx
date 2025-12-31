@@ -6,6 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { 
   Table, 
   TableBody, 
@@ -26,6 +32,7 @@ import {
   BarChart3,
   Activity,
   Eye,
+  Info,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { 
@@ -161,7 +168,19 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Total Clients</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-gray-500">Total Clients</p>
+                    <TooltipProvider>
+                      <UITooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>All leads and accounts in your portfolio</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-2xl font-bold text-black">{data.metrics.totalClients}</p>
                 </div>
                 <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -175,7 +194,19 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Active Opportunities</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-gray-500">Active Opportunities</p>
+                    <TooltipProvider>
+                      <UITooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Open investment opportunities being pursued</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-2xl font-bold text-black">{data.metrics.activeOpportunities}</p>
                 </div>
                 <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -189,7 +220,19 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Conversion Rate</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-gray-500">Conversion Rate</p>
+                    <TooltipProvider>
+                      <UITooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Percentage of leads converted to customers</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-2xl font-bold text-black">{data.metrics.conversionRate}%</p>
                 </div>
                 <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -203,7 +246,19 @@ export default function DashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Total AUM</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-gray-500">Total AUM</p>
+                    <TooltipProvider>
+                      <UITooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Assets Under Management - total portfolio value</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-2xl font-bold text-black">{formatCurrency(data.metrics.totalAUM)}</p>
                 </div>
                 <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">

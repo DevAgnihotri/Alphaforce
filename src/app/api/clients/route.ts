@@ -14,7 +14,7 @@ export async function GET() {
       data: clientsStore,
       count: clientsStore.length,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch clients' },
       { status: 500 }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newClient,
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to create client' },
       { status: 500 }

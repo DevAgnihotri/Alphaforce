@@ -52,7 +52,7 @@ export async function GET(
         opportunities,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch client' },
       { status: 500 }
@@ -83,7 +83,7 @@ export async function PATCH(
       success: true,
       data: updatedClient,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to update client' },
       { status: 500 }

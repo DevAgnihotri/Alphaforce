@@ -10,7 +10,7 @@ export async function GET() {
       data: investments,
       count: investments.length,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch investments' },
       { status: 500 }

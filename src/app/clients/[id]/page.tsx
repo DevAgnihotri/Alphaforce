@@ -521,7 +521,7 @@ export default function ClientDetailPage() {
                   <ul className="space-y-3">
                     {talkingPoints.map((point, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-sm">
+                        <span className="shrink-0 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-sm">
                           {index + 1}
                         </span>
                         <span className="text-gray-700">{point}</span>
@@ -752,7 +752,7 @@ export default function ClientDetailPage() {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <span className="flex-shrink-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold">
+                            <span className="shrink-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold">
                               {index + 1}
                             </span>
                             <h4 className="font-semibold text-black">{prediction.investment_name}</h4>

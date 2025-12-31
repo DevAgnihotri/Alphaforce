@@ -10,6 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, AlertTriangle, Eye } from 'lucide-react';
+import { Search, AlertTriangle, Eye, Info } from 'lucide-react';
 import { Account, getDaysSinceContact } from '@/data/mockData';
 
 export default function ClientsPage() {
@@ -194,17 +200,72 @@ export default function ClientsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Age</TableHead>
-                    <TableHead>Risk</TableHead>
-                    <TableHead>Portfolio Value</TableHead>
-                    <TableHead>Last Contact</TableHead>
-                    <TableHead>Stage</TableHead>
-                    <TableHead>Probability</TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            Risk <Info className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Client&apos;s investment risk tolerance (Low/Medium/High)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            Portfolio Value <Info className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Total value of all client investments</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            Last Contact <Info className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Days since last interaction (call, email, or meeting)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            Stage <Info className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Client lifecycle: Lead → Qualified → Opportunity → Customer</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            Probability <Info className="h-3 w-3 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>AI-predicted likelihood of conversion to customer</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>

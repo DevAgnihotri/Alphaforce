@@ -19,7 +19,7 @@ export async function GET() {
       data: sortedActivities,
       count: sortedActivities.length,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch activities' },
       { status: 500 }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       data: newActivity,
       message: 'Activity logged successfully',
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to log activity' },
       { status: 500 }
