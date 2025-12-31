@@ -17,22 +17,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   AlertTriangle,
   Eye,
   Phone,
@@ -42,7 +26,7 @@ import {
   Clock,
   TrendingUp,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { ActivityLogger } from '@/components/ActivityLogger';
 
 interface Task {
   id: string;
@@ -64,13 +48,6 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [activityModalOpen, setActivityModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [activityForm, setActivityForm] = useState({
-    type: 'call',
-    outcome: 'interested',
-    notes: '',
-  });
 
   const fetchTasks = async () => {
     try {
@@ -108,41 +85,6 @@ export default function TasksPage() {
       : 0;
     return { high, medium, low, total: tasks.length, avgProbability };
   }, [tasks]);
-
-  const handleLogActivity = async () => {
-    if (!selectedTask) return;
-    
-    try {
-      const res = await fetch('/api/activities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: selectedTask.client_id,
-          type: activityForm.type,
-          outcome: activityForm.outcome,
-          notes: activityForm.notes,
-          date: new Date().toISOString().split('T')[0],
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success(`Activity logged for ${selectedTask.client_name}`);
-        setActivityModalOpen(false);
-        setSelectedTask(null);
-        setActivityForm({ type: 'call', outcome: 'interested', notes: '' });
-        // Refresh tasks
-        await fetchTasks();
-      }
-    } catch {
-      toast.error('Failed to log activity');
-    }
-  };
-
-  const openActivityModal = (task: Task, type: 'call' | 'email' | 'meeting') => {
-    setSelectedTask(task);
-    setActivityForm({ ...activityForm, type });
-    setActivityModalOpen(true);
-  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', {
@@ -394,22 +336,28 @@ export default function TasksPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openActivityModal(task, 'call')}
-                              title="Mark as Called"
-                            >
-                              <Phone className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openActivityModal(task, 'email')}
-                              title="Mark as Emailed"
-                            >
-                              <Mail className="h-4 w-4" />
-                            </Button>
+                            <ActivityLogger
+                              clientId={task.client_id}
+                              clientName={task.client_name}
+                              defaultType="call"
+                              onActivityLogged={fetchTasks}
+                              trigger={
+                                <Button variant="ghost" size="sm" title="Log a Call">
+                                  <Phone className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
+                            <ActivityLogger
+                              clientId={task.client_id}
+                              clientName={task.client_name}
+                              defaultType="email"
+                              onActivityLogged={fetchTasks}
+                              trigger={
+                                <Button variant="ghost" size="sm" title="Log an Email">
+                                  <Mail className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                             <Button variant="ghost" size="sm" asChild>
                               <Link href={`/clients/${task.client_id}`}>
                                 <Eye className="h-4 w-4" />
@@ -425,67 +373,6 @@ export default function TasksPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Activity Modal */}
-        <Dialog open={activityModalOpen} onOpenChange={setActivityModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Log Activity</DialogTitle>
-              <DialogDescription>
-                Record an interaction with {selectedTask?.client_name}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Activity Type</label>
-                <Select
-                  value={activityForm.type}
-                  onValueChange={(value) => setActivityForm({ ...activityForm, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="call">Call</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="meeting">Meeting</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Outcome</label>
-                <Select
-                  value={activityForm.outcome}
-                  onValueChange={(value) => setActivityForm({ ...activityForm, outcome: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="interested">Interested</SelectItem>
-                    <SelectItem value="not_interested">Not Interested</SelectItem>
-                    <SelectItem value="invested">Invested</SelectItem>
-                    <SelectItem value="follow_up">Need Follow-up</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Notes</label>
-                <Input
-                  placeholder="Add notes about this interaction..."
-                  value={activityForm.notes}
-                  onChange={(e) => setActivityForm({ ...activityForm, notes: e.target.value })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setActivityModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleLogActivity}>Save Activity</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

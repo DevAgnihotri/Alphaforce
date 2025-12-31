@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -19,23 +19,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   AlertTriangle,
   ArrowLeft,
   Mail,
@@ -46,10 +29,10 @@ import {
   Target,
   MessageSquare,
   RefreshCw,
-  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ExportSummaryButton } from '@/components/ExportSummaryButton';
+import { ActivityLogger } from '@/components/ActivityLogger';
 
 interface ClientDetail {
   id: string;
@@ -107,32 +90,26 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activityModalOpen, setActivityModalOpen] = useState(false);
-  const [activityForm, setActivityForm] = useState({
-    type: 'call',
-    outcome: 'interested',
-    notes: '',
-    date: new Date().toISOString().split('T')[0],
-  });
+
+  const fetchClient = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/clients/${clientId}`);
+      const json = await res.json();
+      if (json.success) {
+        setClient(json.data);
+      } else {
+        setError('Client not found');
+      }
+    } catch {
+      setError('Failed to connect to server');
+    } finally {
+      setLoading(false);
+    }
+  }, [clientId]);
 
   useEffect(() => {
-    async function fetchClient() {
-      try {
-        const res = await fetch(`/api/clients/${clientId}`);
-        const json = await res.json();
-        if (json.success) {
-          setClient(json.data);
-        } else {
-          setError('Client not found');
-        }
-      } catch {
-        setError('Failed to connect to server');
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchClient();
-  }, [clientId]);
+  }, [fetchClient]);
 
   const fetchPredictions = async () => {
     setPredictionsLoading(true);
@@ -151,32 +128,6 @@ export default function ClientDetailPage() {
       toast.error('Failed to generate predictions');
     } finally {
       setPredictionsLoading(false);
-    }
-  };
-
-  const handleLogActivity = async () => {
-    try {
-      const res = await fetch('/api/activities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: clientId,
-          ...activityForm,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success('Activity logged successfully');
-        setActivityModalOpen(false);
-        // Refresh client data
-        const clientRes = await fetch(`/api/clients/${clientId}`);
-        const clientJson = await clientRes.json();
-        if (clientJson.success) {
-          setClient(clientJson.data);
-        }
-      }
-    } catch {
-      toast.error('Failed to log activity');
     }
   };
 
@@ -395,79 +346,11 @@ export default function ClientDetailPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Dialog open={activityModalOpen} onOpenChange={setActivityModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Log Activity
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Log New Activity</DialogTitle>
-                <DialogDescription>
-                  Record an interaction with {client.name}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
-                  <Input
-                    type="date"
-                    value={activityForm.date}
-                    onChange={(e) => setActivityForm({ ...activityForm, date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Activity Type</label>
-                  <Select
-                    value={activityForm.type}
-                    onValueChange={(value) => setActivityForm({ ...activityForm, type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="call">Call</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
-                      <SelectItem value="meeting">Meeting</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Outcome</label>
-                  <Select
-                    value={activityForm.outcome}
-                    onValueChange={(value) => setActivityForm({ ...activityForm, outcome: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="interested">Interested</SelectItem>
-                      <SelectItem value="not_interested">Not Interested</SelectItem>
-                      <SelectItem value="invested">Invested</SelectItem>
-                      <SelectItem value="follow_up">Need Follow-up</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Notes</label>
-                  <Input
-                    placeholder="Add notes about this interaction..."
-                    value={activityForm.notes}
-                    onChange={(e) => setActivityForm({ ...activityForm, notes: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setActivityModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleLogActivity}>Save Activity</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <ActivityLogger
+            clientId={client.id}
+            clientName={client.name}
+            onActivityLogged={fetchClient}
+          />
 
           <Button variant="outline" onClick={fetchPredictions} disabled={predictionsLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${predictionsLoading ? 'animate-spin' : ''}`} />

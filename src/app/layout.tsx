@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AlphaForce - Advisor Copilot",
   description: "Sales Intelligence & Advisor Copilot for Financial Advisors",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
