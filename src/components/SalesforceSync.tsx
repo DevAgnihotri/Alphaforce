@@ -115,36 +115,75 @@ export function SalesforceSync() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Fetch initial data from API
   useEffect(() => {
-    // Simulate initial load
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        const [objectsRes, statsRes] = await Promise.all([
+          fetch('/api/salesforce/sync'),
+          fetch('/api/salesforce/stats'),
+        ]);
+
+        if (objectsRes.ok) {
+          const objectsData = await objectsRes.json();
+          if (objectsData.success) {
+            setObjects(objectsData.data.objects);
+          }
+        }
+
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          if (statsData.success) {
+            setStats(statsData.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch Salesforce data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSync = async () => {
     setSyncing(true);
     
-    // Simulate sync process
+    // Update UI to show pending status
     setObjects(prev => prev.map(obj => ({ ...obj, status: 'pending' as const })));
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Update with new sync times
-    const now = new Date();
-    setObjects(prev => prev.map(obj => ({
-      ...obj,
-      status: 'synced' as const,
-      lastSync: 'Just now',
-    })));
-    
-    setStats(prev => ({
-      ...prev,
-      lastFullSync: now.toLocaleString(),
-      apiCallsToday: prev.apiCallsToday + 4,
-    }));
-    
-    setSyncing(false);
+    try {
+      // Trigger sync via API
+      const syncRes = await fetch('/api/salesforce/sync', {
+        method: 'POST',
+      });
+
+      if (syncRes.ok) {
+        const syncData = await syncRes.json();
+        if (syncData.success) {
+          setObjects(syncData.data.objects);
+        }
+      }
+
+      // Update stats
+      const statsRes = await fetch('/api/salesforce/stats', {
+        method: 'POST',
+      });
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        if (statsData.success) {
+          setStats(statsData.data);
+        }
+      }
+    } catch (error) {
+      console.error('Sync failed:', error);
+      // Revert to previous state on error
+      setObjects(prev => prev.map(obj => ({ ...obj, status: 'error' as const })));
+    } finally {
+      setSyncing(false);
+    }
   };
 
   if (loading) {
