@@ -1,6 +1,7 @@
 'use client';
 
 import { Header } from '@/components/Header';
+import { SalesforceSync } from '@/components/SalesforceSync';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -571,6 +572,9 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Salesforce Integration */}
+        <SalesforceSync />
       </div>
     </div>
   );

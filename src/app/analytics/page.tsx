@@ -1,6 +1,8 @@
 'use client';
 
 import { Header } from '@/components/Header';
+import { SalesforceSync } from '@/components/SalesforceSync';
+import { TableauDashboard } from '@/components/TableauDashboard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -602,6 +604,16 @@ export default function AnalyticsPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Tableau Dashboard Integration */}
+        <div className="mt-8">
+          <TableauDashboard />
+        </div>
+
+        {/* Salesforce Integration */}
+        <div className="mt-8">
+          <SalesforceSync />
+        </div>
       </div>
     </div>
   );
