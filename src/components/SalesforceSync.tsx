@@ -32,15 +32,34 @@ import {
   FileText,
   Info,
   Loader2,
+  LucideIcon,
 } from 'lucide-react';
+
+// Map string icon names to actual icon components
+const iconMap: Record<string, LucideIcon> = {
+  Users,
+  Briefcase,
+  Activity,
+  FileText,
+  Database,
+  Cloud,
+};
 
 interface SalesforceObject {
   name: string;
-  icon: React.ElementType;
+  icon: string | LucideIcon;
   recordCount: number;
   lastSync: string;
   status: 'synced' | 'pending' | 'error';
   description: string;
+}
+
+// Helper to get icon component from string or component
+function getIconComponent(icon: string | LucideIcon): LucideIcon {
+  if (typeof icon === 'string') {
+    return iconMap[icon] || Database;
+  }
+  return icon;
 }
 
 interface SyncStats {
@@ -293,7 +312,7 @@ export function SalesforceSync() {
             </TableHeader>
             <TableBody>
               {objects.map((obj) => {
-                const Icon = obj.icon;
+                const Icon = getIconComponent(obj.icon);
                 return (
                   <TableRow key={obj.name}>
                     <TableCell>

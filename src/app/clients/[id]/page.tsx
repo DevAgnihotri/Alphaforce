@@ -39,7 +39,6 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ExportSummaryButton } from '@/components/ExportSummaryButton';
 import { ActivityLogger } from '@/components/ActivityLogger';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -138,8 +137,8 @@ export default function ClientDetailPage() {
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // AI Insights state
-  const [aiLoading, setAiLoading] = useState(false);
+  // AI Insights state - separate loading for each type
+  const [aiLoadingType, setAiLoadingType] = useState<'opportunity_insight' | 'call_script' | 'email_draft' | null>(null);
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [callPurpose, setCallPurpose] = useState('follow_up');
   const [emailPurpose, setEmailPurpose] = useState('check_in');
@@ -190,7 +189,7 @@ export default function ClientDetailPage() {
   const generateAIInsight = async (type: 'opportunity_insight' | 'call_script' | 'email_draft') => {
     if (!client) return;
     
-    setAiLoading(true);
+    setAiLoadingType(type);
     setAiResponse(null);
     
     try {
@@ -216,7 +215,7 @@ export default function ClientDetailPage() {
     } catch {
       toast.error('Failed to generate AI insight');
     } finally {
-      setAiLoading(false);
+      setAiLoadingType(null);
     }
   };
 
@@ -466,28 +465,6 @@ export default function ClientDetailPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${predictionsLoading ? 'animate-spin' : ''}`} />
             Generate Predictions
           </Button>
-
-          <ExportSummaryButton 
-            client={{
-              id: client.id,
-              name: client.name,
-              email: client.email,
-              phone: client.phone,
-              age: client.age,
-              income: client.income,
-              risk_profile: client.risk_profile,
-              portfolio_value: client.portfolio_value,
-              total_investments: client.total_investments,
-              conversion_probability: client.conversion_probability,
-              interests: client.interests,
-              last_contact: client.last_contact,
-              daysSinceContact: client.daysSinceContact,
-              lifecycle_stage: client.lifecycle_stage,
-              activities: client.activities,
-              portfolio: client.portfolio,
-            }}
-            predictions={predictions}
-          />
         </div>
 
         {/* Main Content Tabs */}
@@ -652,9 +629,9 @@ export default function ClientDetailPage() {
                     <Button 
                       className="w-full gap-2" 
                       onClick={() => generateAIInsight('opportunity_insight')}
-                      disabled={aiLoading}
+                      disabled={aiLoadingType !== null}
                     >
-                      {aiLoading ? (
+                      {aiLoadingType === 'opportunity_insight' ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
                       ) : (
                         <><Sparkles className="h-4 w-4" /> Generate Insight</>
@@ -689,9 +666,9 @@ export default function ClientDetailPage() {
                       className="w-full gap-2" 
                       variant="outline"
                       onClick={() => generateAIInsight('call_script')}
-                      disabled={aiLoading}
+                      disabled={aiLoadingType !== null}
                     >
-                      {aiLoading ? (
+                      {aiLoadingType === 'call_script' ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
                       ) : (
                         <><Phone className="h-4 w-4" /> Generate Call Script</>
@@ -726,9 +703,9 @@ export default function ClientDetailPage() {
                       className="w-full gap-2" 
                       variant="outline"
                       onClick={() => generateAIInsight('email_draft')}
-                      disabled={aiLoading}
+                      disabled={aiLoadingType !== null}
                     >
-                      {aiLoading ? (
+                      {aiLoadingType === 'email_draft' ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Drafting...</>
                       ) : (
                         <><Mail className="h-4 w-4" /> Generate Email Draft</>
@@ -755,7 +732,7 @@ export default function ClientDetailPage() {
 
               {/* Right Column - AI Response */}
               <div>
-                {aiLoading && (
+                {aiLoadingType !== null && (
                   <Card>
                     <CardContent className="p-12 text-center">
                       <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
@@ -765,7 +742,7 @@ export default function ClientDetailPage() {
                   </Card>
                 )}
 
-                {!aiLoading && !aiResponse && (
+                {aiLoadingType === null && !aiResponse && (
                   <Card className="border-dashed">
                     <CardContent className="p-12 text-center">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -779,7 +756,7 @@ export default function ClientDetailPage() {
                   </Card>
                 )}
 
-                {!aiLoading && aiResponse && (
+                {aiLoadingType === null && aiResponse && (
                   <Card className="border-2 border-purple-200">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">

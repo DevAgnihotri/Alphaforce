@@ -94,10 +94,10 @@ export function Sidebar() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 font-medium text-sm">JD</span>
+              <span className="text-gray-600 font-medium text-sm">SG</span>
             </div>
             <div>
-              <p className="text-sm font-medium text-black">John Doe</p>
+              <p className="text-sm font-medium text-black">Saul Goodman</p>
               <p className="text-xs text-gray-500">Financial Advisor</p>
             </div>
           </div>

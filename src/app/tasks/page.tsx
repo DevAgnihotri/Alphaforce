@@ -326,7 +326,7 @@ export default function TasksPage() {
                             {task.conversion_probability}%
                           </Badge>
                         </TableCell>
-                        <TableCell className="max-w-[200px] truncate text-gray-600">
+                        <TableCell className="max-w-50 truncate text-gray-600">
                           {task.reason}
                         </TableCell>
                         <TableCell>

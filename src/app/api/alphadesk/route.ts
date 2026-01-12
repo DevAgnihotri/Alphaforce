@@ -11,7 +11,6 @@ interface AlphaDeskRequest {
   context?: {
     opportunityType?: string;
     opportunityAmount?: number;
-    tonality?: 'formal' | 'friendly' | 'persuasive' | 'empathetic';
     emailPurpose?: string;
     callPurpose?: string;
     additionalNotes?: string;
@@ -29,111 +28,49 @@ function getClientData(clientId: string) {
 function generatePrompt(request: AlphaDeskRequest, clientData: typeof clients[0]): string {
   const { type, context } = request;
   
-  const clientContext = `
-Client Information:
-- Name: ${clientData.name}
-- Age: ${clientData.age}
-- Income: $${clientData.income.toLocaleString()}
-- Risk Profile: ${clientData.risk_profile}
-- Portfolio Value: $${clientData.portfolio_value.toLocaleString()}
-- Interests: ${clientData.interests.join(', ')}
-- Lifecycle Stage: ${clientData.lifecycle_stage}
-- Preferred Contact: ${clientData.preferred_contact}
-- Conversion Probability: ${clientData.conversion_probability}%
-`;
+  const clientContext = `Client: ${clientData.name} | Risk: ${clientData.risk_profile} | Portfolio: $${clientData.portfolio_value.toLocaleString()} | Conversion: ${clientData.conversion_probability}%`;
 
   switch (type) {
     case 'opportunity_insight':
-      return `You are an expert financial advisor assistant. Analyze this investment opportunity for the client and provide actionable insights.
+      return `Financial advisor: Analyze opportunity for client.
 
 ${clientContext}
+${context?.additionalNotes ? `Notes: ${context.additionalNotes}` : ''}
 
-Opportunity Details:
-- Type: ${context?.opportunityType || 'General Investment'}
-- Amount: $${(context?.opportunityAmount || 50000).toLocaleString()}
-${context?.additionalNotes ? `- Additional Context: ${context.additionalNotes}` : ''}
-
-Please provide:
-1. **Opportunity Score** (1-10): How well does this match the client's profile?
-2. **Key Strengths**: Why this could work for this client
-3. **Potential Concerns**: What to be careful about
-4. **Recommended Approach**: How to present this to the client
-5. **Alternative Suggestions**: If this isn't ideal, what else might work
-
-Be specific and reference the client's actual data in your analysis.`;
+Provide brief analysis:
+1. Score (1-10)
+2. Key strengths (2-3 points)
+3. Concerns (1-2 points)
+4. Recommended approach`;
 
     case 'call_script':
-      const tonality = context?.tonality || 'professional';
-      const tonalityGuide = {
-        formal: 'Use professional language, maintain respect and distance, focus on facts and figures.',
-        friendly: 'Be warm and personable, use first names, show genuine interest in their wellbeing.',
-        persuasive: 'Focus on benefits, create urgency, address objections proactively, use success stories.',
-        empathetic: 'Show understanding, listen actively, acknowledge concerns, be patient and supportive.'
-      };
+      return `Financial advisor: Create a concise, practical call script that centers on the CALL PURPOSE and any ADDITIONAL CONTEXT.
 
-      return `You are an expert financial advisor call script writer. Create a comprehensive call script for this client interaction.
+CLIENT: ${clientContext}
+PURPOSE: ${context?.callPurpose || 'Follow-up'}
+${context?.additionalNotes ? `ADDITIONAL CONTEXT: ${context.additionalNotes}` : ''}
 
-${clientContext}
-
-Call Purpose: ${context?.callPurpose || 'Follow-up and relationship building'}
-Tonality: ${tonality.toUpperCase()} - ${tonalityGuide[tonality as keyof typeof tonalityGuide]}
-${context?.additionalNotes ? `Additional Context: ${context.additionalNotes}` : ''}
-
-Generate a complete call script with:
-
-## 🎯 OPENING (30 seconds)
-- Warm greeting with client's name
-- Quick rapport builder based on their profile
-- Clear purpose statement
-
-## 💬 TALKING POINTS (2-3 minutes)
-- 3-4 key discussion points tailored to their interests: ${clientData.interests.join(', ')}
-- Questions to ask to understand their current situation
-- Value propositions aligned with their risk profile (${clientData.risk_profile})
-
-## 🎤 KEY PHRASES TO USE
-- Provide 5-6 impactful phrases that match the ${tonality} tonality
-
-## ⚠️ OBJECTION HANDLING
-- Anticipate 2-3 likely objections based on their profile
-- Provide smooth responses for each
-
-## ✅ CLOSING (30 seconds)
-- Summarize next steps
-- Confirm commitment
-- End on a positive note
-
-Make it natural and conversational, not robotic. Reference their specific situation.`;
+The entire should reflect the PURPOSE and respect additional context.
+- Start with a personalized GREETING that references PURPOSE or a recent interaction.
+Provide:
+1. Opening (greeting + purpose)
+2. 3 talking points
+3. 2 objection responses
+4. Closing (next steps)`;
 
     case 'email_draft':
-      return `You are an expert financial advisor email writer. Create a professional, personalized email for this client.
+      return `Financial advisor: Draft a complete email that fully reflects the PURPOSE and any ADDITIONAL CONTEXT.
 
-${clientContext}
+CLIENT: ${clientContext}
+PURPOSE: ${context?.emailPurpose || 'Check-in'}
+${context?.additionalNotes ? `ADDITIONAL CONTEXT: ${context.additionalNotes}` : ''}
 
-Email Purpose: ${context?.emailPurpose || 'General check-in and portfolio update'}
-Preferred Tone: ${context?.tonality || 'professional'}
-${context?.additionalNotes ? `Additional Context: ${context.additionalNotes}` : ''}
-
-Generate a complete email with:
-
-**Subject Line**: Compelling and personalized
-
-**Email Body**:
-- Personalized greeting
-- Opening that references their specific situation or recent interaction
-- Main content addressing the purpose
-- Clear value proposition or information
-- Specific call-to-action
-- Professional closing
-
-**Key Requirements**:
-- Reference their interests: ${clientData.interests.join(', ')}
-- Consider their risk profile: ${clientData.risk_profile}
-- Match their lifecycle stage: ${clientData.lifecycle_stage}
-- Keep it concise but comprehensive
-- Include specific numbers/data where relevant
-
-Make it feel personal and tailored, not like a template.`;
+The entire email should reflect the PURPOSE and respect additional context.
+- Start with a personalized GREETING that references PURPOSE or a recent interaction.
+Provide:
+- Subject line
+- Short professional email (3-4 paragraphs)
+- Clear call-to-action`;
 
     default:
       return 'Please provide a valid request type.';

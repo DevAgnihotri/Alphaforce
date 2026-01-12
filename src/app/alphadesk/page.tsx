@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Table,
   TableBody,
   TableCell,
@@ -22,11 +28,24 @@ import {
   RefreshCw,
   DollarSign,
   Target,
-  Zap,
   ArrowRight,
   Users,
   Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
 } from 'lucide-react';
+
+interface OllamaStatus {
+  status: 'connected' | 'disconnected' | 'error';
+  ollama: boolean;
+  model: string;
+  modelAvailable: boolean;
+  hasExactModel?: boolean;
+  ollamaVersion?: string | null;
+  message: string;
+  availableModels?: string[];
+}
 
 interface SalesforceOpportunity {
   id: string;
@@ -53,6 +72,27 @@ export default function AlphaDeskPage() {
   const [opportunities, setOpportunities] = useState<SalesforceOpportunity[]>([]);
   const [summary, setSummary] = useState<OpportunitySummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus | null>(null);
+  const [checkingOllama, setCheckingOllama] = useState(true);
+
+  const checkOllamaStatus = async () => {
+    setCheckingOllama(true);
+    try {
+      const res = await fetch('/api/alphadesk/status');
+      const data = await res.json();
+      setOllamaStatus(data);
+    } catch {
+      setOllamaStatus({
+        status: 'disconnected',
+        ollama: false,
+        model: 'unknown',
+        modelAvailable: false,
+        message: 'Failed to check Ollama status',
+      });
+    } finally {
+      setCheckingOllama(false);
+    }
+  };
 
   const fetchOpportunities = async () => {
     setLoading(true);
@@ -72,15 +112,16 @@ export default function AlphaDeskPage() {
 
   useEffect(() => {
     fetchOpportunities();
+    checkOllamaStatus();
   }, []);
 
   return (
     <div>
-      <Header title="AlphaDesk" subtitle="AI-Powered Advisor Assistant" />
+      <Header title="AlphaDesk" subtitle="Powered by DeepSeek AI" />
       
       <div className="p-6 space-y-6">
         {/* Hero Section */}
-        <Card className="bg-linear-to-br from-purple-600 via-indigo-600 to-blue-600 text-white border-0">
+        <Card className="bg-linear-to-br from-purple-900 via-indigo-600 to-blue-600 text-white border-0">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
@@ -93,10 +134,64 @@ export default function AlphaDeskPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge className="bg-white/20 text-white hover:bg-white/30">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Powered by Ollama
-                </Badge>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge 
+                        className={`cursor-pointer transition-colors ${
+                          checkingOllama 
+                            ? 'bg-white/20 text-white hover:bg-white/30' 
+                            : ollamaStatus?.status === 'connected' && ollamaStatus?.modelAvailable
+                              ? 'bg-green-500/80 text-white hover:bg-green-500'
+                              : ollamaStatus?.status === 'connected'
+                                ? 'bg-yellow-500/80 text-white hover:bg-yellow-500'
+                                : 'bg-red-500/80 text-white hover:bg-red-500'
+                        }`}
+                        onClick={checkOllamaStatus}
+                      >
+                        {checkingOllama ? (
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        ) : ollamaStatus?.status === 'connected' && ollamaStatus?.modelAvailable ? (
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                        ) : ollamaStatus?.status === 'connected' ? (
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                        ) : (
+                          <XCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {checkingOllama 
+                          ? 'Checking...' 
+                          : ollamaStatus?.status === 'connected' && ollamaStatus?.modelAvailable
+                            ? 'Ollama Active'
+                            : ollamaStatus?.status === 'connected'
+                              ? 'Model Missing'
+                              : 'Ollama Offline'
+                        }
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <div className="text-sm">
+                        <p className="font-semibold mb-1">
+                          {ollamaStatus?.status === 'connected' ? '✅ Connected' : '❌ Disconnected'}
+                        </p>
+                        <p className="text-muted-foreground">{ollamaStatus?.message}</p>
+                        {ollamaStatus?.ollamaVersion && (
+                          <p className="mt-1 text-xs">Ollama v{ollamaStatus.ollamaVersion}</p>
+                        )}
+                        {ollamaStatus?.status === 'connected' && (
+                          <p className="text-xs">
+                            Model: <span className={ollamaStatus.modelAvailable ? 'text-green-600' : 'text-red-500'}>
+                              {ollamaStatus.model} {ollamaStatus.modelAvailable ? '✓' : '✗'}
+                            </span>
+                          </p>
+                        )}
+                        {ollamaStatus?.status === 'disconnected' && (
+                          <p className="mt-1 text-xs font-mono bg-muted p-1 rounded">ollama serve</p>
+                        )}
+                        <p className="mt-2 text-xs text-muted-foreground">Click to refresh</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <Button asChild variant="secondary">
                   <Link href="/clients">
                     <Users className="h-4 w-4 mr-2" />
@@ -108,8 +203,41 @@ export default function AlphaDeskPage() {
           </CardContent>
         </Card>
 
+        {/* Ollama Status Alert - Show when offline or model missing */}
+        {!checkingOllama && ollamaStatus && (ollamaStatus.status === 'disconnected' || !ollamaStatus.modelAvailable) && (
+          <Card className={`border ${ollamaStatus.status === 'disconnected' ? 'border-red-200 bg-red-50 dark:bg-red-950/20' : 'border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20'}`}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                {ollamaStatus.status === 'disconnected' ? (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-yellow-600" />
+                )}
+                <div className="flex-1">
+                  <p className={ollamaStatus.status === 'disconnected' ? 'text-red-800 dark:text-red-200' : 'text-yellow-800 dark:text-yellow-200'}>
+                    <span className="font-semibold">
+                      {ollamaStatus.status === 'disconnected' ? 'Ollama Not Running: ' : 'DeepSeek Model Missing: '}
+                    </span>
+                    {ollamaStatus.status === 'disconnected' 
+                      ? 'AI features require Ollama. Start it with: '
+                      : 'Install the required model with: '
+                    }
+                    <code className="bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded font-mono text-sm">
+                      {ollamaStatus.status === 'disconnected' ? 'ollama serve' : `ollama pull ${ollamaStatus.model}`}
+                    </code>
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={checkOllamaStatus}>
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Recheck
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Info Card */}
-        <Card className="border-purple-200 bg-purple-50">
+        <Card className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <Sparkles className="h-5 w-5 text-purple-600" />
