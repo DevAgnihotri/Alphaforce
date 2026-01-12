@@ -1,8 +1,15 @@
 'use client';
 
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useTour } from '@/components/ProductTour';
 
 interface HeaderProps {
   title: string;
@@ -10,6 +17,8 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle }: HeaderProps) {
+  const { startTour } = useTour();
+
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       {/* Page Title */}
@@ -30,6 +39,25 @@ export function Header({ title, subtitle }: HeaderProps) {
             className="pl-10 w-64 bg-gray-50 border-gray-200"
           />
         </div>
+
+        {/* Help / Tour */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={startTour}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Take a tour of AlphaForce</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">

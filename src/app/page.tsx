@@ -8,11 +8,9 @@ import {
   Target, 
   TrendingUp, 
   Shield, 
-  Zap, 
   BarChart3,
   Users,
   Mail,
-  Phone,
   ArrowRight,
   ChevronDown,
   Sparkles,
@@ -117,9 +115,9 @@ function FeatureCard({
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
       className="group relative"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative p-8 border border-white/[0.08] rounded-2xl bg-white/[0.02] backdrop-blur-sm hover:border-white/[0.15] transition-colors duration-500">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center mb-6 group-hover:from-cyan-500/30 group-hover:to-blue-600/30 transition-all duration-500">
+      <div className="absolute inset-0 bg-linear-to-b from-white/8 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative p-8 border border-white/8 rounded-2xl bg-white/2 backdrop-blur-sm hover:border-white/15 transition-colors duration-500">
+        <div className="w-12 h-12 rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center mb-6 group-hover:from-cyan-500/30 group-hover:to-blue-600/30 transition-all duration-500">
           <Icon className="w-6 h-6 text-cyan-400" />
         </div>
         <h3 className="text-lg font-medium text-white mb-3 tracking-tight">{title}</h3>
@@ -184,15 +182,15 @@ export default function LandingPage() {
     <div ref={containerRef} className="relative bg-[#0a0a0b] text-white overflow-x-hidden">
       {/* Progress indicator */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-px bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 z-50 origin-left"
+        className="fixed top-0 left-0 right-0 h-px bg-linear-to-r from-cyan-500 via-blue-500 to-purple-500 z-50 origin-left"
         style={{ scaleX: smoothProgress }}
       />
 
       {/* Ambient background effects */}
       <div className="fixed inset-0 pointer-events-none">
-        <GlowOrb className="w-[800px] h-[800px] bg-cyan-600 -top-40 -left-40" delay={0} />
-        <GlowOrb className="w-[600px] h-[600px] bg-blue-600 top-1/3 -right-20" delay={2} />
-        <GlowOrb className="w-[700px] h-[700px] bg-purple-600 -bottom-40 left-1/3" delay={4} />
+        <GlowOrb className="w-200 h-200 bg-cyan-600 -top-40 -left-40" delay={0} />
+        <GlowOrb className="w-150 h-150 bg-blue-600 top-1/3 -right-20" delay={2} />
+        <GlowOrb className="w-175 h-175 bg-purple-600 -bottom-40 left-1/3" delay={4} />
       </div>
 
       <GridBackground />
@@ -215,7 +213,7 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-sm">AF</span>
             </div>
             <span className="font-semibold text-lg tracking-tight">AlphaForce</span>
@@ -224,7 +222,7 @@ export default function LandingPage() {
             <span className="text-sm text-white/40 hidden md:block">For Elite Financial Advisors</span>
             <Link 
               href="/dashboard"
-              className="px-5 py-2.5 text-sm font-medium bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] rounded-lg transition-all duration-300 hover:border-white/[0.2]"
+              className="px-5 py-2.5 text-sm font-medium bg-white/8 hover:bg-white/12 border border-white/10 rounded-lg transition-all duration-300 hover:border-white/20"
             >
               Enter System
             </Link>
@@ -257,7 +255,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.05] border border-white/[0.1] rounded-full mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8"
           >
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-xs uppercase tracking-[0.15em] text-white/60">System Online</span>
@@ -267,15 +265,20 @@ export default function LandingPage() {
           {/* Main headline */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight mb-6 leading-[0.95]">
             <span className="block text-white/90">Your AI</span>
-            <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="block bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
               Force Multiplier
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
+          <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-8 font-light leading-relaxed">
             The intelligence layer for elite financial advisors. 
             Transform complexity into conviction.
+          </p>
+          
+          {/* Experience line */}
+          <p className="text-sm md:text-base text-cyan-400/70 max-w-xl mx-auto mb-12 font-light italic">
+            Experience AlphaForce by stepping into the shoes of Saul Goodman, a financial advisor.
           </p>
 
           {/* CTA buttons */}
@@ -284,7 +287,7 @@ export default function LandingPage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-medium text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-shadow duration-300 flex items-center gap-3"
+                className="group px-8 py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl font-medium text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-shadow duration-300 flex items-center gap-3"
               >
                 Experience AlphaForce
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -331,19 +334,19 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-6 mb-20">
             <RevealSection className="md:col-span-1">
-              <div className="p-6 border border-red-500/20 bg-red-500/[0.03] rounded-2xl">
+              <div className="p-6 border border-red-500/20 bg-red-500/3 rounded-2xl">
                 <div className="text-red-400/80 text-sm font-medium mb-2">Follow-ups slip</div>
                 <p className="text-white/40 text-sm">Critical client touchpoints disappear into crowded calendars</p>
               </div>
             </RevealSection>
             <RevealSection className="md:col-span-1">
-              <div className="p-6 border border-amber-500/20 bg-amber-500/[0.03] rounded-2xl">
+              <div className="p-6 border border-amber-500/20 bg-amber-500/3 rounded-2xl">
                 <div className="text-amber-400/80 text-sm font-medium mb-2">Opportunities decay</div>
                 <p className="text-white/40 text-sm">High-value prospects cool while you&apos;re managing volume</p>
               </div>
             </RevealSection>
             <RevealSection className="md:col-span-1">
-              <div className="p-6 border border-orange-500/20 bg-orange-500/[0.03] rounded-2xl">
+              <div className="p-6 border border-orange-500/20 bg-orange-500/3 rounded-2xl">
                 <div className="text-orange-400/80 text-sm font-medium mb-2">Risk hides in plain sight</div>
                 <p className="text-white/40 text-sm">Portfolio misalignments buried in spreadsheets</p>
               </div>
@@ -362,7 +365,7 @@ export default function LandingPage() {
 
       {/* Visual Divider */}
       <div className="relative h-px max-w-4xl mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent" />
       </div>
 
       {/* Capabilities Section */}
@@ -428,9 +431,9 @@ export default function LandingPage() {
           <RevealSection>
             <div className="relative">
               {/* Mock dashboard visualization */}
-              <div className="relative aspect-[16/9] rounded-2xl border border-white/[0.1] bg-gradient-to-b from-white/[0.03] to-transparent overflow-hidden">
+              <div className="relative aspect-video rounded-2xl border border-white/10 bg-linear-to-b from-white/3 to-transparent overflow-hidden">
                 {/* Dashboard header */}
-                <div className="absolute top-0 left-0 right-0 h-12 border-b border-white/[0.05] flex items-center px-6 gap-2">
+                <div className="absolute top-0 left-0 right-0 h-12 border-b border-white/5 flex items-center px-6 gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500/50" />
                   <div className="w-3 h-3 rounded-full bg-amber-500/50" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
@@ -447,7 +450,7 @@ export default function LandingPage() {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="h-8 bg-white/[0.03] rounded-lg"
+                        className="h-8 bg-white/3 rounded-lg"
                       />
                     ))}
                   </div>
@@ -461,10 +464,10 @@ export default function LandingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + i * 0.1 }}
-                        className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl"
+                        className="p-4 bg-white/2 border border-white/5 rounded-xl"
                       >
-                        <div className="h-3 w-16 bg-white/[0.1] rounded mb-3" />
-                        <div className="h-6 w-24 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded" />
+                        <div className="h-3 w-16 bg-white/10 rounded mb-3" />
+                        <div className="h-6 w-24 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded" />
                       </motion.div>
                     ))}
 
@@ -473,7 +476,7 @@ export default function LandingPage() {
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="col-span-2 row-span-2 p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl"
+                      className="col-span-2 row-span-2 p-4 bg-white/2 border border-white/5 rounded-xl"
                     >
                       <div className="h-full flex items-end justify-around gap-2 pb-4">
                         {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95].map((h, i) => (
@@ -482,7 +485,7 @@ export default function LandingPage() {
                             initial={{ height: 0 }}
                             whileInView={{ height: `${h}%` }}
                             transition={{ delay: 0.8 + i * 0.05, duration: 0.5 }}
-                            className="w-full bg-gradient-to-t from-cyan-500/40 to-blue-500/20 rounded-t"
+                            className="w-full bg-linear-to-t from-cyan-500/40 to-blue-500/20 rounded-t"
                           />
                         ))}
                       </div>
@@ -493,14 +496,14 @@ export default function LandingPage() {
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       transition={{ delay: 0.7 }}
-                      className="row-span-2 p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl space-y-3"
+                      className="row-span-2 p-4 bg-white/2 border border-white/5 rounded-xl space-y-3"
                     >
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20" />
+                          <div className="w-8 h-8 rounded-full bg-linear-to-br from-cyan-500/20 to-blue-500/20" />
                           <div className="flex-1">
-                            <div className="h-2 w-20 bg-white/[0.1] rounded mb-1" />
-                            <div className="h-2 w-12 bg-white/[0.05] rounded" />
+                            <div className="h-2 w-20 bg-white/10 rounded mb-1" />
+                            <div className="h-2 w-12 bg-white/5 rounded" />
                           </div>
                         </div>
                       ))}
@@ -509,7 +512,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Ambient glow overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0b] via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
           </RevealSection>
@@ -565,7 +568,7 @@ export default function LandingPage() {
             >
               {/* Radial glow behind CTA */}
               <div className="absolute inset-0 -z-10">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-3xl rounded-full" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-linear-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-3xl rounded-full" />
               </div>
 
               <Sparkles className="w-8 h-8 text-cyan-400 mx-auto mb-8" />
@@ -582,13 +585,13 @@ export default function LandingPage() {
                 <motion.button
                   whileHover={{ scale: 1.03, boxShadow: '0 0 60px rgba(6,182,212,0.4)' }}
                   whileTap={{ scale: 0.98 }}
-                  className="group relative px-12 py-5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl font-medium text-lg text-white shadow-2xl shadow-cyan-500/20 transition-all duration-500"
+                  className="group relative px-12 py-5 bg-linear-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl font-medium text-lg text-white shadow-2xl shadow-cyan-500/20 transition-all duration-500"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     Experience AlphaForce
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10" />
+                  <div className="absolute inset-0 bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10" />
                 </motion.button>
               </Link>
             </motion.div>
@@ -597,10 +600,10 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative py-12 px-6 border-t border-white/[0.05]">
+      <footer className="relative py-12 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-linear-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xs">AF</span>
             </div>
             <span className="text-sm text-white/60">AlphaForce</span>

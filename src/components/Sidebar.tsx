@@ -17,12 +17,12 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Clients', href: '/clients', icon: Users },
-  { name: 'Opportunities', href: '/opportunities', icon: Target },
-  { name: 'Tasks', href: '/tasks', icon: ListTodo },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'AlphaDesk', href: '/alphadesk', icon: Brain },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard-nav' },
+  { name: 'Clients', href: '/clients', icon: Users, tourId: 'clients-nav' },
+  { name: 'Opportunities', href: '/opportunities', icon: Target, tourId: 'opportunities-nav' },
+  { name: 'Tasks', href: '/tasks', icon: ListTodo, tourId: 'tasks-nav' },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, tourId: 'analytics-nav' },
+  { name: 'AlphaDesk', href: '/alphadesk', icon: Brain, tourId: 'alphadesk-nav' },
 ];
 
 export function Sidebar() {
@@ -76,6 +76,7 @@ export function Sidebar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
+                data-tour={item.tourId}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                   isActive 
