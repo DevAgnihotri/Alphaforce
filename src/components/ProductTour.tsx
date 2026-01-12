@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { markTourCompleted } from '@/lib/sessionTracking';
 import { 
   X, 
   ChevronLeft, 
@@ -381,12 +382,13 @@ export function ProductTour() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const [isBrowser, setIsBrowser] = useState(false);
+
+  // Check if in browser
+  const isBrowser = typeof window !== 'undefined';
 
   // Check localStorage and show tour after initial render
   useEffect(() => {
-    // Mark as browser environment
-    setIsBrowser(true);
+    if (!isBrowser) return;
     
     const hasSeenTour = localStorage.getItem('alphaforce-tour-completed');
     const shouldShowTour = localStorage.getItem('alphaforce-show-tour');
@@ -400,7 +402,20 @@ export function ProductTour() {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isBrowser]);
+
+  // Listen for custom event to start tour
+  useEffect(() => {
+    if (!isBrowser) return;
+    
+    const handleStartTour = () => {
+      setCurrentStep(0);
+      setIsOpen(true);
+    };
+    
+    window.addEventListener('alphaforce-start-tour', handleStartTour);
+    return () => window.removeEventListener('alphaforce-start-tour', handleStartTour);
+  }, [isBrowser]);
 
   // Update target element position
   const updateTargetPosition = useCallback(() => {
@@ -439,6 +454,7 @@ export function ProductTour() {
     setIsOpen(false);
     setCurrentStep(0);
     localStorage.setItem('alphaforce-tour-completed', 'true');
+    markTourCompleted(); // Track in session
   }, []);
 
   const handleNext = useCallback(() => {
@@ -462,13 +478,13 @@ export function ProductTour() {
   const handleAction = useCallback(() => {
     const step = tourSteps[currentStep];
     if (step.action?.href) {
-      // Use setTimeout to defer navigation
-      setTimeout(() => {
-        window.location.assign(step.action!.href!);
-      }, 0);
+      completeTour();
+      // Navigate after closing
+      window.location.href = step.action.href;
+      return;
     }
     handleNext();
-  }, [currentStep, handleNext]);
+  }, [currentStep, handleNext, completeTour]);
 
   if (!isBrowser || !isOpen) return null;
 
@@ -500,15 +516,18 @@ export function ProductTour() {
 
 // Hook to trigger the tour manually
 export function useTour() {
-  const startTour = () => {
+  const startTour = useCallback(() => {
+    // Clear the completed flag so tour can show
     localStorage.removeItem('alphaforce-tour-completed');
-    localStorage.setItem('alphaforce-show-tour', 'true');
-    window.location.reload();
-  };
+    // Dispatch custom event to start tour immediately
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('alphaforce-start-tour'));
+    }
+  }, []);
 
-  const resetTour = () => {
+  const resetTour = useCallback(() => {
     localStorage.removeItem('alphaforce-tour-completed');
-  };
+  }, []);
 
   return { startTour, resetTour };
 }

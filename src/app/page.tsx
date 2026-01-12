@@ -283,37 +283,41 @@ export default function LandingPage() {
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="group px-8 py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl font-medium text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-shadow duration-300 flex items-center gap-3"
-              >
-                Experience AlphaForce
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-            </Link>
+            <motion.button
+              onClick={() => {
+                // Clear any previous tour completion and trigger tour on dashboard
+                localStorage.removeItem('alphaforce-tour-completed');
+                localStorage.setItem('alphaforce-show-tour', 'true');
+                window.location.href = '/dashboard';
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group px-8 py-4 bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl font-medium text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-shadow duration-300 flex items-center gap-3"
+            >
+              Experience AlphaForce
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
             <button className="px-8 py-4 text-white/60 hover:text-white/90 font-medium transition-colors duration-300 flex items-center gap-2">
               <Activity className="w-4 h-4" />
               View Capabilities
             </button>
           </div>
-        </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
-        >
+          {/* Scroll indicator - inside content block */}
           <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="flex flex-col items-center gap-2 text-white/30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+            className="mt-16"
           >
-            <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
-            <ChevronDown className="w-4 h-4" />
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="flex flex-col items-center gap-2 text-white/30"
+            >
+              <span className="text-xs uppercase tracking-[0.2em]">Scroll to explore</span>
+              <ChevronDown className="w-4 h-4" />
+            </motion.div>
           </motion.div>
         </motion.div>
       </motion.section>
@@ -581,19 +585,22 @@ export default function LandingPage() {
                 Join the advisors who&apos;ve transformed their practice with AI-powered intelligence.
               </p>
 
-              <Link href="/dashboard">
-                <motion.button
-                  whileHover={{ scale: 1.03, boxShadow: '0 0 60px rgba(6,182,212,0.4)' }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group relative px-12 py-5 bg-linear-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl font-medium text-lg text-white shadow-2xl shadow-cyan-500/20 transition-all duration-500"
-                >
-                  <span className="relative z-10 flex items-center gap-3">
-                    Experience AlphaForce
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-                  </span>
-                  <div className="absolute inset-0 bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10" />
-                </motion.button>
-              </Link>
+              <motion.button
+                onClick={() => {
+                  localStorage.removeItem('alphaforce-tour-completed');
+                  localStorage.setItem('alphaforce-show-tour', 'true');
+                  window.location.href = '/dashboard';
+                }}
+                whileHover={{ scale: 1.03, boxShadow: '0 0 60px rgba(6,182,212,0.4)' }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative px-12 py-5 bg-linear-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl font-medium text-lg text-white shadow-2xl shadow-cyan-500/20 transition-all duration-500"
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  Experience AlphaForce
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10" />
+              </motion.button>
             </motion.div>
           </RevealSection>
         </div>

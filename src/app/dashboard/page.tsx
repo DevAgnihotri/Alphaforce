@@ -72,6 +72,15 @@ import {
   Cell,
 } from 'recharts';
 import Link from 'next/link';
+import { clients as salesforceClients, activities as salesforceActivities } from '@/data/mockData';
+
+// Helper function to calculate days since last contact
+const calculateDaysSince = (dateStr: string): number => {
+  const today = new Date('2026-01-12'); // Current date
+  const lastContact = new Date(dateStr);
+  const diffTime = today.getTime() - lastContact.getTime();
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+};
 
 // Alert detail interfaces
 interface AlertClient {
@@ -85,28 +94,51 @@ interface AlertClient {
   riskProfile: 'low' | 'medium' | 'high';
 }
 
-// Mock data for alert details - using original clients (001-015) for negative scenarios
-const urgentFollowupClients: AlertClient[] = [
-  { id: 'client_003', name: 'Maria Garcia', email: 'maria.garcia@email.com', phone: '+1-555-0103', lastContact: '2025-12-10', daysInactive: 33, portfolioValue: 180000, riskProfile: 'low' },
-  { id: 'client_005', name: 'Sarah Thompson', email: 'sarah.thompson@email.com', phone: '+1-555-0105', lastContact: '2025-12-05', daysInactive: 38, portfolioValue: 85000, riskProfile: 'high' },
-  { id: 'client_007', name: 'David Lee', email: 'david.lee@email.com', phone: '+1-555-0107', lastContact: '2025-12-08', daysInactive: 35, portfolioValue: 42000, riskProfile: 'low' },
-  { id: 'client_009', name: 'Jennifer Martinez', email: 'jennifer.m@email.com', phone: '+1-555-0109', lastContact: '2025-12-12', daysInactive: 31, portfolioValue: 95000, riskProfile: 'medium' },
-  { id: 'client_011', name: 'Christopher Davis', email: 'c.davis@email.com', phone: '+1-555-0111', lastContact: '2025-12-18', daysInactive: 25, portfolioValue: 125000, riskProfile: 'medium' },
-  { id: 'client_012', name: 'Amanda Wilson', email: 'amanda.w@email.com', phone: '+1-555-0112', lastContact: '2025-12-20', daysInactive: 23, portfolioValue: 67000, riskProfile: 'low' },
-];
+// ============ DERIVED DATA FROM SALESFORCE MOCK DATA ============
 
-const inactiveClients: AlertClient[] = [
-  { id: 'client_003', name: 'Maria Garcia', email: 'maria.garcia@email.com', phone: '+1-555-0103', lastContact: '2025-12-10', daysInactive: 33, portfolioValue: 180000, riskProfile: 'low' },
-  { id: 'client_005', name: 'Sarah Thompson', email: 'sarah.thompson@email.com', phone: '+1-555-0105', lastContact: '2025-12-05', daysInactive: 38, portfolioValue: 85000, riskProfile: 'high' },
-  { id: 'client_007', name: 'David Lee', email: 'david.lee@email.com', phone: '+1-555-0107', lastContact: '2025-12-08', daysInactive: 35, portfolioValue: 42000, riskProfile: 'low' },
-  { id: 'client_009', name: 'Jennifer Martinez', email: 'jennifer.m@email.com', phone: '+1-555-0109', lastContact: '2025-12-12', daysInactive: 31, portfolioValue: 95000, riskProfile: 'medium' },
-];
+// Urgent Follow-ups: clients not contacted in 14+ days (from Salesforce data)
+const urgentFollowupClients: AlertClient[] = salesforceClients
+  .filter(client => calculateDaysSince(client.last_contact) >= 14)
+  .map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    lastContact: client.last_contact,
+    daysInactive: calculateDaysSince(client.last_contact),
+    portfolioValue: client.portfolio_value,
+    riskProfile: client.risk_profile,
+  }))
+  .sort((a, b) => b.daysInactive - a.daysInactive);
 
-const highRiskClients: AlertClient[] = [
-  { id: 'client_002', name: 'Robert Chen', email: 'robert.chen@email.com', phone: '+1-555-0102', lastContact: '2025-12-15', daysInactive: 28, portfolioValue: 250000, riskProfile: 'high' },
-  { id: 'client_005', name: 'Sarah Thompson', email: 'sarah.thompson@email.com', phone: '+1-555-0105', lastContact: '2025-12-05', daysInactive: 38, portfolioValue: 85000, riskProfile: 'high' },
-  { id: 'client_013', name: 'Ryan Taylor', email: 'ryan.t@email.com', phone: '+1-555-0113', lastContact: '2025-12-22', daysInactive: 21, portfolioValue: 210000, riskProfile: 'high' },
-];
+// Inactive Clients: not contacted in 30+ days (from Salesforce data)
+const inactiveClients: AlertClient[] = salesforceClients
+  .filter(client => calculateDaysSince(client.last_contact) >= 30)
+  .map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    lastContact: client.last_contact,
+    daysInactive: calculateDaysSince(client.last_contact),
+    portfolioValue: client.portfolio_value,
+    riskProfile: client.risk_profile,
+  }))
+  .sort((a, b) => b.daysInactive - a.daysInactive);
+
+// High-Risk Portfolio Clients (from Salesforce data)
+const highRiskClients: AlertClient[] = salesforceClients
+  .filter(client => client.risk_profile === 'high')
+  .map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    lastContact: client.last_contact,
+    daysInactive: calculateDaysSince(client.last_contact),
+    portfolioValue: client.portfolio_value,
+    riskProfile: client.risk_profile,
+  }));
 
 // ============ POSITIVE DATA - Healthy & Top Performing Clients ============
 
@@ -145,44 +177,60 @@ interface RecentSuccess {
   date: string;
 }
 
-// Healthy & Engaged Clients (recently contacted, low-risk, stable portfolios)
-// Using clients from mockData (client_016 to client_025 - newly added positive clients)
-const healthyClients: HealthyClient[] = [
-  { id: 'client_016', name: 'Hannah Mitchell', email: 'hannah.mitchell@email.com', phone: '+1-555-0116', lastContact: '2026-01-08', daysSinceContact: 4, portfolioValue: 195000, portfolioGrowth: 14.2, riskProfile: 'low', satisfaction: 95, investmentsCount: 5 },
-  { id: 'client_017', name: 'Liam Foster', email: 'liam.foster@email.com', phone: '+1-555-0117', lastContact: '2026-01-06', daysSinceContact: 6, portfolioValue: 320000, portfolioGrowth: 18.5, riskProfile: 'medium', satisfaction: 92, investmentsCount: 7 },
-  { id: 'client_018', name: 'Ava Richardson', email: 'ava.richardson@email.com', phone: '+1-555-0118', lastContact: '2026-01-09', daysSinceContact: 3, portfolioValue: 245000, portfolioGrowth: 16.8, riskProfile: 'low', satisfaction: 97, investmentsCount: 6 },
-  { id: 'client_019', name: 'Noah Cooper', email: 'noah.cooper@email.com', phone: '+1-555-0119', lastContact: '2026-01-07', daysSinceContact: 5, portfolioValue: 410000, portfolioGrowth: 22.1, riskProfile: 'medium', satisfaction: 94, investmentsCount: 9 },
-  { id: 'client_020', name: 'Mia Phillips', email: 'mia.phillips@email.com', phone: '+1-555-0120', lastContact: '2026-01-10', daysSinceContact: 2, portfolioValue: 178000, portfolioGrowth: 11.3, riskProfile: 'low', satisfaction: 96, investmentsCount: 4 },
-  { id: 'client_021', name: 'Ethan Gray', email: 'ethan.gray@email.com', phone: '+1-555-0121', lastContact: '2026-01-08', daysSinceContact: 4, portfolioValue: 285000, portfolioGrowth: 15.7, riskProfile: 'low', satisfaction: 93, investmentsCount: 6 },
-  { id: 'client_022', name: 'Charlotte Wood', email: 'charlotte.wood@email.com', phone: '+1-555-0122', lastContact: '2026-01-11', daysSinceContact: 1, portfolioValue: 365000, portfolioGrowth: 19.4, riskProfile: 'medium', satisfaction: 98, investmentsCount: 8 },
-  { id: 'client_023', name: 'Lucas Hughes', email: 'lucas.hughes@email.com', phone: '+1-555-0123', lastContact: '2026-01-05', daysSinceContact: 7, portfolioValue: 225000, portfolioGrowth: 13.6, riskProfile: 'low', satisfaction: 91, investmentsCount: 5 },
-  { id: 'client_024', name: 'Amelia Ward', email: 'amelia.ward@email.com', phone: '+1-555-0124', lastContact: '2026-01-09', daysSinceContact: 3, portfolioValue: 298000, portfolioGrowth: 17.2, riskProfile: 'low', satisfaction: 95, investmentsCount: 7 },
-  { id: 'client_025', name: 'Oliver Price', email: 'oliver.price@email.com', phone: '+1-555-0125', lastContact: '2026-01-07', daysSinceContact: 5, portfolioValue: 520000, portfolioGrowth: 24.8, riskProfile: 'medium', satisfaction: 99, investmentsCount: 12 },
-];
+// Healthy & Engaged Clients: recently contacted (within 14 days) with good conversion probability
+// Using actual Salesforce mock data
+const healthyClients: HealthyClient[] = salesforceClients
+  .filter(client => calculateDaysSince(client.last_contact) <= 14 && client.conversion_probability >= 75)
+  .map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone,
+    lastContact: client.last_contact,
+    daysSinceContact: calculateDaysSince(client.last_contact),
+    portfolioValue: client.portfolio_value,
+    portfolioGrowth: Math.round((client.conversion_probability / 5) * 10) / 10, // Derived growth metric
+    riskProfile: client.risk_profile,
+    satisfaction: client.conversion_probability,
+    investmentsCount: client.total_investments,
+  }))
+  .sort((a, b) => a.daysSinceContact - b.daysSinceContact);
 
-// Top Performing Clients (highest returns) - using clients from mockData
-const topPerformers: TopPerformer[] = [
-  { id: 'client_025', name: 'Oliver Price', email: 'oliver.price@email.com', portfolioValue: 520000, ytdReturn: 24.8, totalGains: 103396, investmentTypes: ['Tech Stocks', 'ETFs', 'Bonds'], clientSince: '2021-03-15' },
-  { id: 'client_019', name: 'Noah Cooper', email: 'noah.cooper@email.com', portfolioValue: 410000, ytdReturn: 22.1, totalGains: 74028, investmentTypes: ['Mutual Funds', 'Bonds', 'REITs'], clientSince: '2020-08-22' },
-  { id: 'client_022', name: 'Charlotte Wood', email: 'charlotte.wood@email.com', portfolioValue: 365000, ytdReturn: 19.4, totalGains: 59148, investmentTypes: ['Dividend Stocks', 'Bonds'], clientSince: '2019-11-10' },
-  { id: 'client_017', name: 'Liam Foster', email: 'liam.foster@email.com', portfolioValue: 320000, ytdReturn: 18.5, totalGains: 49816, investmentTypes: ['Growth Stocks', 'ETFs'], clientSince: '2022-01-05' },
-  { id: 'client_024', name: 'Amelia Ward', email: 'amelia.ward@email.com', portfolioValue: 298000, ytdReturn: 17.2, totalGains: 43612, investmentTypes: ['Balanced Funds', 'Bonds'], clientSince: '2020-05-18' },
-  { id: 'client_018', name: 'Ava Richardson', email: 'ava.richardson@email.com', portfolioValue: 245000, ytdReturn: 16.8, totalGains: 35142, investmentTypes: ['Index Funds', 'ETFs'], clientSince: '2021-07-30' },
-  { id: 'client_021', name: 'Ethan Gray', email: 'ethan.gray@email.com', portfolioValue: 285000, ytdReturn: 15.7, totalGains: 38698, investmentTypes: ['Blue Chips', 'Bonds'], clientSince: '2022-04-12' },
-  { id: 'client_016', name: 'Hannah Mitchell', email: 'hannah.mitchell@email.com', portfolioValue: 195000, ytdReturn: 14.2, totalGains: 24261, investmentTypes: ['Tech ETFs', 'Bonds'], clientSince: '2023-02-28' },
-];
+// Top Performing Clients: highest portfolio values (from Salesforce data)
+const topPerformers: TopPerformer[] = salesforceClients
+  .filter(client => client.lifecycle_stage === 'customer')
+  .sort((a, b) => b.portfolio_value - a.portfolio_value)
+  .slice(0, 8)
+  .map((client, index) => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    portfolioValue: client.portfolio_value,
+    ytdReturn: Math.round((15 + (client.conversion_probability / 10)) * 10) / 10, // Derived YTD return
+    totalGains: Math.round(client.portfolio_value * 0.15), // Estimated gains
+    investmentTypes: client.interests.slice(0, 3).map(i => i.charAt(0).toUpperCase() + i.slice(1)),
+    // Deterministic date based on index to avoid hydration mismatch
+    clientSince: `202${index % 4}-${String((index % 12) + 1).padStart(2, '0')}-15`,
+  }));
 
-// Recent Successes & Milestones - using clients from mockData
-const recentSuccesses: RecentSuccess[] = [
-  { id: 'success_001', clientName: 'Oliver Price', clientId: 'client_025', type: 'portfolio_milestone', description: 'Reached $500K portfolio milestone!', amount: 500000, date: '2026-01-10' },
-  { id: 'success_002', clientName: 'Noah Cooper', clientId: 'client_019', type: 'new_investment', description: 'New investment in Healthcare Innovation ETF', amount: 50000, date: '2026-01-09' },
-  { id: 'success_003', clientName: 'Charlotte Wood', clientId: 'client_022', type: 'goal_reached', description: 'Retirement savings goal achieved ahead of schedule!', amount: 300000, date: '2026-01-08' },
-  { id: 'success_004', clientName: 'Liam Foster', clientId: 'client_017', type: 'referral', description: 'Referred 2 new high-value prospects', date: '2026-01-07' },
-  { id: 'success_005', clientName: 'Ava Richardson', clientId: 'client_018', type: 'new_investment', description: 'Diversified into Real Estate fund', amount: 35000, date: '2026-01-06' },
-  { id: 'success_006', clientName: 'Amelia Ward', clientId: 'client_024', type: 'portfolio_milestone', description: 'Portfolio up 50% since joining!', date: '2026-01-05' },
-  { id: 'success_007', clientName: 'Lucas Hughes', clientId: 'client_023', type: 'goal_reached', description: 'College fund target met for first child', amount: 80000, date: '2026-01-04' },
-  { id: 'success_008', clientName: 'Hannah Mitchell', clientId: 'client_016', type: 'new_investment', description: 'First-time investor in international markets', amount: 15000, date: '2026-01-03' },
-];
+// Recent Successes & Milestones - derived from recent activities in Salesforce data
+const recentSuccesses: RecentSuccess[] = salesforceActivities
+  .filter(act => act.outcome === 'invested' || act.outcome === 'interested')
+  .slice(0, 8)
+  .map((act, index) => {
+    const client = salesforceClients.find(c => c.id === act.client_id);
+    const successTypes: ('new_investment' | 'goal_reached' | 'referral' | 'portfolio_milestone')[] = 
+      ['new_investment', 'goal_reached', 'referral', 'portfolio_milestone'];
+    return {
+      id: `success_${String(index + 1).padStart(3, '0')}`,
+      clientName: client?.name || 'Unknown Client',
+      clientId: act.client_id,
+      type: successTypes[index % 4],
+      description: act.notes,
+      amount: client ? Math.round(client.portfolio_value * 0.1) : undefined,
+      date: act.date,
+    };
+  });
 
 interface DashboardData {
   metrics: {
@@ -735,11 +783,11 @@ export default function DashboardPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="overflow-auto flex-1 -mx-6 px-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-green-700">Total Healthy AUM</p>
-                      <p className="text-xl font-bold text-green-800">
+                    <CardContent className="p-3">
+                      <p className="text-xs text-green-700">Total Healthy AUM</p>
+                      <p className="text-lg font-bold text-green-800">
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(
                           healthyClients.reduce((sum, c) => sum + c.portfolioValue, 0)
                         )}
@@ -747,25 +795,29 @@ export default function DashboardPage() {
                     </CardContent>
                   </Card>
                   <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-green-700">Avg Satisfaction</p>
-                      <p className="text-xl font-bold text-green-800">
-                        {(healthyClients.reduce((sum, c) => sum + c.satisfaction, 0) / healthyClients.length).toFixed(1)}%
+                    <CardContent className="p-3">
+                      <p className="text-xs text-green-700">Avg Satisfaction</p>
+                      <p className="text-lg font-bold text-green-800">
+                        {healthyClients.length > 0 
+                          ? (healthyClients.reduce((sum, c) => sum + c.satisfaction, 0) / healthyClients.length).toFixed(1)
+                          : 0}%
                       </p>
                     </CardContent>
                   </Card>
                   <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-green-700">Avg Growth</p>
-                      <p className="text-xl font-bold text-green-800">
-                        +{(healthyClients.reduce((sum, c) => sum + c.portfolioGrowth, 0) / healthyClients.length).toFixed(1)}%
+                    <CardContent className="p-3">
+                      <p className="text-xs text-green-700">Avg Growth</p>
+                      <p className="text-lg font-bold text-green-800">
+                        +{healthyClients.length > 0
+                          ? (healthyClients.reduce((sum, c) => sum + c.portfolioGrowth, 0) / healthyClients.length).toFixed(1)
+                          : 0}%
                       </p>
                     </CardContent>
                   </Card>
                   <Card className="bg-green-50 border-green-200">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-green-700">Total Investments</p>
-                      <p className="text-xl font-bold text-green-800">
+                    <CardContent className="p-3">
+                      <p className="text-xs text-green-700">Total Investments</p>
+                      <p className="text-lg font-bold text-green-800">
                         {healthyClients.reduce((sum, c) => sum + c.investmentsCount, 0)}
                       </p>
                     </CardContent>

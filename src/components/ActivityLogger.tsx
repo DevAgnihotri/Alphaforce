@@ -23,6 +23,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Plus, Phone, Mail, Users, Loader2 } from 'lucide-react';
+import { notifyActivityLogged } from '@/lib/notifications';
+import { trackAction } from '@/lib/sessionTracking';
 
 interface ActivityLoggerProps {
   clientId: string;
@@ -93,6 +95,9 @@ export function ActivityLogger({
         toast.success('Activity logged successfully', {
           description: `${form.type.charAt(0).toUpperCase() + form.type.slice(1)} with ${clientName} recorded.`,
         });
+        // Add notification and track action
+        notifyActivityLogged(clientName, form.type.charAt(0).toUpperCase() + form.type.slice(1));
+        trackAction();
         setOpen(false);
         resetForm();
         onActivityLogged?.();

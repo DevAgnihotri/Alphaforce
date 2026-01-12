@@ -12,9 +12,11 @@ import {
   X,
   Brain,
   Target,
+  Rocket,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { useTour } from '@/components/ProductTour';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard-nav' },
@@ -91,6 +93,11 @@ export function Sidebar() {
           })}
         </nav>
 
+        {/* Guided Tour Button */}
+        <div className="absolute bottom-24 left-0 right-0 px-4">
+          <TourButton />
+        </div>
+
         {/* Advisor Info */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex items-center gap-3">
@@ -105,5 +112,20 @@ export function Sidebar() {
         </div>
       </aside>
     </>
+  );
+}
+
+function TourButton() {
+  const { startTour } = useTour();
+  
+  return (
+    <Button
+      onClick={startTour}
+      variant="outline"
+      className="w-full gap-2 justify-start text-gray-700 hover:bg-gray-100 hover:text-black border-gray-200"
+    >
+      <Rocket className="h-4 w-4" />
+      Guided Tour
+    </Button>
   );
 }

@@ -20,6 +20,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Sparkles, Loader2, Lightbulb, MessageSquare, TrendingUp, FileText, Copy, Check } from 'lucide-react';
+import { notifyAIInsight } from '@/lib/notifications';
 
 interface AIInsightsProps {
   clientId: string;
@@ -93,6 +94,10 @@ export function AIInsights({
       if (json.success) {
         setResponse(json.data.response);
         setIsDemo(json.demo || false);
+        
+        // Add notification for AI insight
+        const typeLabel = insightTypes.find(t => t.value === insightType)?.label || 'Insights';
+        notifyAIInsight(`${typeLabel} generated for ${clientName}`);
         
         if (json.demo) {
           toast.info('AI Demo Mode - Start Ollama for live AI generation');

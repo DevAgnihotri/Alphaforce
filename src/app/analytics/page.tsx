@@ -393,11 +393,6 @@ function ActivityFeed() {
           </div>
         ))}
       </CardContent>
-      <CardFooter className="pt-0">
-        <Button variant="ghost" size="sm" className="w-full text-xs">
-          View All Activity
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
