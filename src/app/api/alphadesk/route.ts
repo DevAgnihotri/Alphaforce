@@ -50,7 +50,7 @@ CLIENT: ${clientContext}
 PURPOSE: ${context?.callPurpose || 'Follow-up'}
 ${context?.additionalNotes ? `ADDITIONAL CONTEXT: ${context.additionalNotes}` : ''}
 
-The entire should reflect the PURPOSE and respect additional context.
+answer in terms of  "you", The entire should reflect the PURPOSE and respect additional context.
 - Start with a personalized GREETING that references PURPOSE or a recent interaction.
 Provide:
 1. Opening (greeting + purpose)
@@ -65,7 +65,7 @@ CLIENT: ${clientContext}
 PURPOSE: ${context?.emailPurpose || 'Check-in'}
 ${context?.additionalNotes ? `ADDITIONAL CONTEXT: ${context.additionalNotes}` : ''}
 
-The entire email should reflect the PURPOSE and respect additional context.
+answer in terms of  "you", The entire email should reflect the PURPOSE and respect additional context.
 - Start with a personalized GREETING that references PURPOSE or a recent interaction.
 Provide:
 - Subject line
