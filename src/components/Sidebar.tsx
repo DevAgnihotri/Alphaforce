@@ -9,7 +9,9 @@ import {
   ListTodo, 
   BarChart3,
   Menu,
-  X
+  X,
+  Brain,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -17,8 +19,10 @@ import { useState } from 'react';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients', href: '/clients', icon: Users },
+  { name: 'Opportunities', href: '/opportunities', icon: Target },
   { name: 'Tasks', href: '/tasks', icon: ListTodo },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'AlphaDesk', href: '/alphadesk', icon: Brain },
 ];
 
 export function Sidebar() {
@@ -66,6 +70,7 @@ export function Sidebar() {
         <nav className="p-4 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const Icon = item.icon;
             return (
               <Link
                 key={item.name}
@@ -78,7 +83,7 @@ export function Sidebar() {
                     : "text-gray-700 hover:bg-gray-100 hover:text-black"
                 )}
               >
-                <item.icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" />
                 {item.name}
               </Link>
             );

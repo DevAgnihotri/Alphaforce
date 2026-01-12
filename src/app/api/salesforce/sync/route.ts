@@ -14,7 +14,7 @@ let salesforceObjects: SalesforceObject[] = [
   {
     name: 'Leads',
     icon: 'Users',
-    recordCount: 15,
+    recordCount: 25,
     lastSync: '2 min ago',
     status: 'synced',
     description: 'Potential clients captured from various sources',
@@ -22,7 +22,7 @@ let salesforceObjects: SalesforceObject[] = [
   {
     name: 'Accounts',
     icon: 'Briefcase',
-    recordCount: 15,
+    recordCount: 25,
     lastSync: '2 min ago',
     status: 'synced',
     description: 'Active client accounts with portfolio data',
@@ -30,7 +30,7 @@ let salesforceObjects: SalesforceObject[] = [
   {
     name: 'Opportunities',
     icon: 'FileText',
-    recordCount: 32,
+    recordCount: 42,
     lastSync: '5 min ago',
     status: 'synced',
     description: 'Investment opportunities and deal pipeline',
@@ -38,7 +38,7 @@ let salesforceObjects: SalesforceObject[] = [
   {
     name: 'Activities',
     icon: 'Activity',
-    recordCount: 48,
+    recordCount: 68,
     lastSync: '1 min ago',
     status: 'synced',
     description: 'Calls, emails, and meetings with clients',

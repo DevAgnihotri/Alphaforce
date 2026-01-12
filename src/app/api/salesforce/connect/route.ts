@@ -1,64 +1,39 @@
 import { NextResponse } from 'next/server';
-import { Connection } from 'jsforce';
 
 /**
  * GET /api/salesforce/connect
- * Minimal connectivity check to your Salesforce org using jsforce.
- * Reads credentials from environment variables and returns a small sample.
+ * Mock Salesforce connectivity check - returns simulated org data.
+ * No real Salesforce connection required.
  */
 export async function GET() {
-  const loginUrl = process.env.SF_LOGIN_URL || 'https://login.salesforce.com';
-  const username = process.env.SF_USERNAME;
-  const password = process.env.SF_PASSWORD;
-  const securityToken = process.env.SF_SECURITY_TOKEN || '';
+  // Simulate a small delay like a real API call
+  await new Promise(resolve => setTimeout(resolve, 500));
 
-  if (!username || !password) {
-    return NextResponse.json(
-      {
-        success: false,
-        error:
-          'Missing Salesforce credentials. Set SF_USERNAME, SF_PASSWORD, SF_SECURITY_TOKEN in .env.local',
-      },
-      { status: 400 }
-    );
-  }
+  // Mock Salesforce org data
+  const mockOrgData = {
+    id: 'MOCK_ORG_00D5e000001234567',
+    username: 'advisor@alphaforce.demo',
+    instance_url: 'https://alphaforce-demo.my.salesforce.com',
+    user_id: 'MOCK_USER_0055e000001234567',
+  };
 
-  const conn = new Connection({ loginUrl });
+  // Mock account samples
+  const mockAccounts = [
+    { id: 'ACC001', name: 'Johnson Family Trust' },
+    { id: 'ACC002', name: 'Smith Retirement Fund' },
+    { id: 'ACC003', name: 'Williams Investment LLC' },
+    { id: 'ACC004', name: 'Brown Family Office' },
+    { id: 'ACC005', name: 'Davis Wealth Management' },
+  ];
 
-  try {
-    await conn.login(username, `${password}${securityToken}`);
-
-    // Fetch a tiny sample: last 5 Accounts
-    const accounts = await conn.query<{ Id: string; Name: string }>(
-      "SELECT Id, Name FROM Account ORDER BY CreatedDate DESC LIMIT 5"
-    );
-
-    // Basic org identity
-    const id = await conn.identity();
-
-    return NextResponse.json({
-      success: true,
-      org: {
-        id: id.organization_id,
-        username: id.username,
-        instance_url: conn.instanceUrl,
-        user_id: id.user_id,
-      },
-      sample: {
-        accounts: accounts.records.map((a) => ({ id: a.Id, name: a.Name })),
-        count: accounts.totalSize,
-      },
-    });
-  } catch (e: any) {
-    const message = e?.message || 'Salesforce login/query failed';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-        hint:
-          'Verify SF_LOGIN_URL (prod vs sandbox), username/password, and security token. If MFA is enforced, use OAuth flow instead.',
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+    mock: true, // Flag to indicate this is mock data
+    org: mockOrgData,
+    sample: {
+      accounts: mockAccounts,
+      count: mockAccounts.length,
+    },
+    message: 'Connected to mock Salesforce instance (Demo Mode)',
+  });
 }

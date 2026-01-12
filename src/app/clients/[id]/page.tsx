@@ -29,10 +29,28 @@ import {
   Target,
   MessageSquare,
   RefreshCw,
+  Sparkles,
+  Brain,
+  Mic,
+  Send,
+  Copy,
+  Check,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ExportSummaryButton } from '@/components/ExportSummaryButton';
 import { ActivityLogger } from '@/components/ActivityLogger';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import ReactMarkdown from 'react-markdown';
 
 interface ClientDetail {
   id: string;
@@ -81,6 +99,35 @@ interface Prediction {
   reason: string;
 }
 
+interface AIResponse {
+  type: string;
+  clientId: string;
+  clientName: string;
+  response: string;
+  generatedAt: string;
+}
+
+const callPurposeOptions = [
+  { value: 'follow_up', label: 'Follow-up & Relationship Building' },
+  { value: 'portfolio_review', label: 'Portfolio Review' },
+  { value: 'new_opportunity', label: 'Present New Opportunity' },
+  { value: 'rebalancing', label: 'Portfolio Rebalancing Discussion' },
+  { value: 'concern_address', label: 'Address Concerns' },
+  { value: 'milestone', label: 'Celebrate Milestone' },
+  { value: 'reengagement', label: 'Re-engagement Call' },
+];
+
+const emailPurposeOptions = [
+  { value: 'check_in', label: 'General Check-in' },
+  { value: 'portfolio_update', label: 'Portfolio Performance Update' },
+  { value: 'new_opportunity', label: 'New Investment Opportunity' },
+  { value: 'meeting_request', label: 'Meeting Request' },
+  { value: 'follow_up', label: 'Follow-up After Call' },
+  { value: 'market_update', label: 'Market Update & Insights' },
+  { value: 'thank_you', label: 'Thank You / Appreciation' },
+  { value: 'reengagement', label: 'Re-engagement' },
+];
+
 export default function ClientDetailPage() {
   const params = useParams();
   const clientId = params.id as string;
@@ -90,6 +137,14 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // AI Insights state
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
+  const [callPurpose, setCallPurpose] = useState('follow_up');
+  const [emailPurpose, setEmailPurpose] = useState('check_in');
+  const [additionalNotes, setAdditionalNotes] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const fetchClient = useCallback(async () => {
     try {
@@ -128,6 +183,61 @@ export default function ClientDetailPage() {
       toast.error('Failed to generate predictions');
     } finally {
       setPredictionsLoading(false);
+    }
+  };
+
+  // AI Insight generation function
+  const generateAIInsight = async (type: 'opportunity_insight' | 'call_script' | 'email_draft') => {
+    if (!client) return;
+    
+    setAiLoading(true);
+    setAiResponse(null);
+    
+    try {
+      const res = await fetch('/api/alphadesk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          clientId: client.id,
+          context: {
+            callPurpose: type === 'call_script' ? callPurpose : undefined,
+            emailPurpose: type === 'email_draft' ? emailPurpose : undefined,
+            additionalNotes,
+          },
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setAiResponse(data.data);
+        toast.success('AI insight generated successfully');
+      }
+    } catch {
+      toast.error('Failed to generate AI insight');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleCopyAI = async () => {
+    if (aiResponse?.response) {
+      await navigator.clipboard.writeText(aiResponse.response);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast.success('Copied to clipboard');
+    }
+  };
+
+  const handleDownloadAI = () => {
+    if (aiResponse?.response && client) {
+      const blob = new Blob([aiResponse.response], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${client.name.replace(' ', '-')}-${aiResponse.type}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -384,6 +494,10 @@ export default function ClientDetailPage() {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="ai-insights" className="gap-1">
+              <Brain className="h-4 w-4" />
+              AI Insights
+            </TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="predictions">Predictions</TabsTrigger>
@@ -495,6 +609,250 @@ export default function ClientDetailPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* AI Insights Tab */}
+          <TabsContent value="ai-insights" className="space-y-4">
+            {/* AI Hero */}
+            <Card className="bg-linear-to-br from-purple-600 via-indigo-600 to-blue-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Brain className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">AlphaDesk AI for {client.name}</h3>
+                    <p className="text-white/80 text-sm">Generate personalized insights, call scripts, and emails</p>
+                  </div>
+                  <div className="ml-auto">
+                    <Badge className="bg-white/20 text-white hover:bg-white/30">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Powered by Ollama
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Generation Options */}
+              <div className="space-y-4">
+                {/* Opportunity Insight Card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Sparkles className="h-5 w-5 text-yellow-500" />
+                      Quick Opportunity Insight
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Get AI-powered analysis on the best investment opportunities for this client based on their profile.
+                    </p>
+                    <Button 
+                      className="w-full gap-2" 
+                      onClick={() => generateAIInsight('opportunity_insight')}
+                      disabled={aiLoading}
+                    >
+                      {aiLoading ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
+                      ) : (
+                        <><Sparkles className="h-4 w-4" /> Generate Insight</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Call Script Card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Mic className="h-5 w-5 text-blue-500" />
+                      Call Script Generator
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Call Purpose</Label>
+                      <Select value={callPurpose} onValueChange={setCallPurpose}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {callPurposeOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button 
+                      className="w-full gap-2" 
+                      variant="outline"
+                      onClick={() => generateAIInsight('call_script')}
+                      disabled={aiLoading}
+                    >
+                      {aiLoading ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
+                      ) : (
+                        <><Phone className="h-4 w-4" /> Generate Call Script</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Email Draft Card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Send className="h-5 w-5 text-green-500" />
+                      Email Draft Generator
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Email Purpose</Label>
+                      <Select value={emailPurpose} onValueChange={setEmailPurpose}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {emailPurposeOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button 
+                      className="w-full gap-2" 
+                      variant="outline"
+                      onClick={() => generateAIInsight('email_draft')}
+                      disabled={aiLoading}
+                    >
+                      {aiLoading ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> Drafting...</>
+                      ) : (
+                        <><Mail className="h-4 w-4" /> Generate Email Draft</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Additional Notes */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Additional Context</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      placeholder="Add any specific context, recent conversations, or notes..."
+                      value={additionalNotes}
+                      onChange={(e) => setAdditionalNotes(e.target.value)}
+                      rows={3}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column - AI Response */}
+              <div>
+                {aiLoading && (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">AI is thinking...</h3>
+                      <p className="text-gray-500">Generating personalized content for {client.name}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!aiLoading && !aiResponse && (
+                  <Card className="border-dashed">
+                    <CardContent className="p-12 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">Ready to Generate</h3>
+                      <p className="text-gray-500 max-w-md mx-auto">
+                        Select an option on the left to generate AI-powered content tailored for {client.name}.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!aiLoading && aiResponse && (
+                  <Card className="border-2 border-purple-200">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 text-purple-700">
+                          <Sparkles className="h-5 w-5" />
+                          {aiResponse.type === 'opportunity_insight' ? 'Opportunity Insight' :
+                           aiResponse.type === 'call_script' ? 'Call Script' : 'Email Draft'}
+                        </CardTitle>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={handleCopyAI} className="gap-1">
+                            {copied ? (
+                              <><Check className="h-4 w-4 text-green-600" /> Copied!</>
+                            ) : (
+                              <><Copy className="h-4 w-4" /> Copy</>
+                            )}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={handleDownloadAI} className="gap-1">
+                            <Download className="h-4 w-4" /> Download
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Generated at {new Date(aiResponse.generatedAt).toLocaleString()}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose prose-sm max-w-none bg-gray-50 rounded-lg p-4 max-h-125 overflow-y-auto">
+                        <ReactMarkdown>{aiResponse.response}</ReactMarkdown>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Client Quick Stats for AI */}
+                <Card className="mt-4">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Client Profile Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Risk Profile</span>
+                        <Badge variant="outline" className={
+                          client.risk_profile === 'high' ? 'border-red-500 text-red-600' :
+                          client.risk_profile === 'medium' ? 'border-yellow-500 text-yellow-600' :
+                          'border-green-500 text-green-600'
+                        }>
+                          {client.risk_profile}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Conversion</span>
+                        <span className="font-medium">{client.conversion_probability}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Portfolio</span>
+                        <span className="font-medium">{formatCurrency(client.portfolio_value)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Days Inactive</span>
+                        <span className={`font-medium ${client.daysSinceContact > 14 ? 'text-red-600' : ''}`}>
+                          {client.daysSinceContact}
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-500">Interests: </span>
+                        <span className="font-medium capitalize">{client.interests.join(', ')}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Portfolio Tab */}

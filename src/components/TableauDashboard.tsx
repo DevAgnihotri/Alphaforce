@@ -1,42 +1,47 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
 import {
   BarChart3,
-  PieChart,
+  PieChart as PieChartIcon,
   TrendingUp,
   Users,
   DollarSign,
   ExternalLink,
-  Maximize2,
-  Info,
   Activity,
   Target,
+  Sparkles,
+  ArrowUpRight,
+  Globe,
+  Layers,
 } from 'lucide-react';
 import {
   BarChart,
   Bar,
-  PieChart as RechartsPieChart,
+  PieChart,
   Pie,
   Cell,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  Legend,
   AreaChart,
   Area,
+  RadialBarChart,
+  RadialBar,
+  Legend,
 } from 'recharts';
 
 // Mock Tableau-style data
@@ -51,24 +56,24 @@ const advisorPerformanceData = [
 ];
 
 const investmentPopularityData = [
-  { name: 'Stocks', value: 35, color: '#000000' },
-  { name: 'Mutual Funds', value: 28, color: '#374151' },
-  { name: 'ETFs', value: 20, color: '#6B7280' },
-  { name: 'Fixed Income', value: 17, color: '#9CA3AF' },
+  { name: 'Stocks', value: 35, fill: 'hsl(221.2 83.2% 53.3%)' },
+  { name: 'Mutual Funds', value: 28, fill: 'hsl(142.1 76.2% 36.3%)' },
+  { name: 'ETFs', value: 20, fill: 'hsl(262.1 83.3% 57.8%)' },
+  { name: 'Fixed Income', value: 17, fill: 'hsl(32.1 94.6% 43.7%)' },
 ];
 
 const contactMethodData = [
-  { method: 'Phone Call', success: 68, total: 100 },
-  { method: 'Email', success: 45, total: 100 },
-  { method: 'Meeting', success: 82, total: 100 },
-  { method: 'Video Call', success: 75, total: 100 },
+  { method: 'Phone Call', success: 68 },
+  { method: 'Email', success: 45 },
+  { method: 'Meeting', success: 82 },
+  { method: 'Video Call', success: 75 },
 ];
 
 const clientSegmentData = [
-  { segment: 'High Net Worth', aum: 4500000, clients: 8, avgReturn: 12.5 },
-  { segment: 'Growth', aum: 2800000, clients: 15, avgReturn: 10.2 },
-  { segment: 'Conservative', aum: 1500000, clients: 12, avgReturn: 6.8 },
-  { segment: 'New Investors', aum: 800000, clients: 10, avgReturn: 8.5 },
+  { segment: 'High Net Worth', aum: 4.5, clients: 8, fill: 'hsl(221.2 83.2% 53.3%)' },
+  { segment: 'Growth', aum: 2.8, clients: 15, fill: 'hsl(142.1 76.2% 36.3%)' },
+  { segment: 'Conservative', aum: 1.5, clients: 12, fill: 'hsl(262.1 83.3% 57.8%)' },
+  { segment: 'New Investors', aum: 0.8, clients: 10, fill: 'hsl(32.1 94.6% 43.7%)' },
 ];
 
 const aumTrendData = [
@@ -81,47 +86,58 @@ const aumTrendData = [
   { month: 'Jan', aum: 10.2 },
 ];
 
-interface DashboardCardProps {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-  tooltip?: string;
-}
+const goalCompletionData = [
+  { name: 'Revenue', value: 87, fill: 'hsl(142.1 76.2% 36.3%)' },
+  { name: 'Clients', value: 92, fill: 'hsl(221.2 83.2% 53.3%)' },
+  { name: 'AUM', value: 78, fill: 'hsl(262.1 83.3% 57.8%)' },
+  { name: 'Retention', value: 95, fill: 'hsl(32.1 94.6% 43.7%)' },
+];
 
-function DashboardCard({ title, description, icon: Icon, children, tooltip }: DashboardCardProps) {
+// Chart configurations
+const performanceConfig: ChartConfig = {
+  conversions: { label: 'Conversions', color: 'hsl(221.2 83.2% 53.3%)' },
+  meetings: { label: 'Meetings', color: 'hsl(142.1 76.2% 36.3%)' },
+  calls: { label: 'Calls', color: 'hsl(262.1 83.3% 57.8%)' },
+};
+
+const contactConfig: ChartConfig = {
+  success: { label: 'Success Rate', color: 'hsl(221.2 83.2% 53.3%)' },
+};
+
+const investmentConfig: ChartConfig = {
+  value: { label: 'Allocation %' },
+  Stocks: { color: 'hsl(221.2 83.2% 53.3%)' },
+  'Mutual Funds': { color: 'hsl(142.1 76.2% 36.3%)' },
+  ETFs: { color: 'hsl(262.1 83.3% 57.8%)' },
+  'Fixed Income': { color: 'hsl(32.1 94.6% 43.7%)' },
+};
+
+// Mini Stat Component
+function MiniStat({ label, value, icon: Icon, change, color }: {
+  label: string;
+  value: string;
+  icon: React.ElementType;
+  change?: string;
+  color: string;
+}) {
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon className="h-5 w-5 text-gray-600" />
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                {title}
-                {tooltip && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info className="h-3 w-3 text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-xs">{tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </CardTitle>
-              <CardDescription className="text-xs">{description}</CardDescription>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Maximize2 className="h-4 w-4" />
-          </Button>
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+      <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}20` }}>
+        <Icon className="h-4 w-4" style={{ color }} />
+      </div>
+      <div className="flex-1">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-lg font-bold">{value}</p>
+          {change && (
+            <span className="text-xs text-emerald-600 flex items-center">
+              <ArrowUpRight className="h-3 w-3" />
+              {change}
+            </span>
+          )}
         </div>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -129,253 +145,357 @@ export function TableauDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="shadow-xl border-0 bg-linear-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 overflow-hidden">
+      <CardHeader className="border-b bg-linear-to-r from-orange-500/10 via-pink-500/10 to-purple-500/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-orange-600" />
+            <div className="p-2.5 bg-linear-to-br from-orange-500 to-pink-500 rounded-xl shadow-lg">
+              <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-xl">
                 Tableau Analytics
-                <Badge variant="secondary" className="text-xs">Live</Badge>
+                <Badge className="bg-linear-to-r from-orange-500 to-pink-500 text-white border-0 text-xs">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Live
+                </Badge>
               </CardTitle>
               <CardDescription>
-                Interactive dashboards • Real-time insights
+                Interactive dashboards • Real-time insights • AI-powered
               </CardDescription>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2 shadow-sm">
             <ExternalLink className="h-4 w-4" />
             Open in Tableau
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
-            <TabsTrigger value="overview" className="gap-1">
-              <BarChart3 className="h-3 w-3" />
-              Overview
+
+      <CardContent className="p-6">
+        {/* Mini Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <MiniStat 
+            label="Total AUM" 
+            value="$10.2M" 
+            icon={DollarSign} 
+            change="+6.2%"
+            color="#10b981"
+          />
+          <MiniStat 
+            label="Active Clients" 
+            value="45" 
+            icon={Users} 
+            change="+8"
+            color="#3b82f6"
+          />
+          <MiniStat 
+            label="Conversions" 
+            value="28" 
+            icon={Target} 
+            change="+12%"
+            color="#8b5cf6"
+          />
+          <MiniStat 
+            label="Activities" 
+            value="156" 
+            icon={Activity} 
+            change="+23%"
+            color="#f59e0b"
+          />
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            <TabsTrigger value="overview" className="gap-1.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="performance" className="gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Performance
+            <TabsTrigger value="performance" className="gap-1.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Performance</span>
             </TabsTrigger>
-            <TabsTrigger value="investments" className="gap-1">
-              <PieChart className="h-3 w-3" />
-              Investments
+            <TabsTrigger value="investments" className="gap-1.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm">
+              <PieChartIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Investments</span>
             </TabsTrigger>
-            <TabsTrigger value="clients" className="gap-1">
-              <Users className="h-3 w-3" />
-              Clients
+            <TabsTrigger value="clients" className="gap-1.5 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Clients</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* AUM Trend */}
-              <DashboardCard
-                title="AUM Growth Trend"
-                description="Assets Under Management (in millions)"
-                icon={DollarSign}
-                tooltip="Total portfolio value managed across all clients"
-              >
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={aumTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="month" fontSize={12} />
-                      <YAxis fontSize={12} tickFormatter={(v) => `$${v}M`} />
-                      <RechartsTooltip 
-                        formatter={(value) => [`$${value}M`, 'AUM']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="aum" 
-                        stroke="#000" 
-                        fill="#e5e7eb"
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </DashboardCard>
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900">
+                      <DollarSign className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">AUM Growth Trend</CardTitle>
+                      <CardDescription className="text-xs">Assets Under Management (millions)</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={aumTrendData}>
+                        <defs>
+                          <linearGradient id="aumGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                            <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="month" className="text-xs" />
+                        <YAxis className="text-xs" tickFormatter={(v) => `$${v}M`} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="aum" 
+                          stroke="#10b981" 
+                          fill="url(#aumGradient)"
+                          strokeWidth={3}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Investment Distribution */}
-              <DashboardCard
-                title="Investment Distribution"
-                description="Portfolio allocation by type"
-                icon={PieChart}
-                tooltip="How client investments are distributed across asset classes"
-              >
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPieChart>
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900">
+                      <PieChartIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Investment Distribution</CardTitle>
+                      <CardDescription className="text-xs">Portfolio allocation by type</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={investmentConfig} className="h-52">
+                    <PieChart>
                       <Pie
                         data={investmentPopularityData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={40}
-                        outerRadius={70}
-                        paddingAngle={2}
+                        innerRadius={45}
+                        outerRadius={75}
+                        paddingAngle={3}
                         dataKey="value"
                       >
                         {investmentPopularityData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
                       </Pie>
-                      <RechartsTooltip />
+                      <ChartTooltip content={<ChartTooltipContent />} />
                       <Legend 
                         layout="vertical" 
                         align="right" 
                         verticalAlign="middle"
-                        fontSize={12}
+                        formatter={(value) => <span className="text-xs">{value}</span>}
                       />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
-                </div>
-              </DashboardCard>
+                    </PieChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* Performance Tab */}
-          <TabsContent value="performance" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TabsContent value="performance" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Advisor Activity */}
-              <DashboardCard
-                title="Advisor Activity Metrics"
-                description="Monthly conversions, meetings & calls"
-                icon={Activity}
-                tooltip="Track your engagement activities and conversion success"
-              >
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900">
+                      <Activity className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Advisor Activity Metrics</CardTitle>
+                      <CardDescription className="text-xs">Monthly performance breakdown</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={performanceConfig} className="h-52">
                     <BarChart data={advisorPerformanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="month" fontSize={12} />
-                      <YAxis fontSize={12} />
-                      <RechartsTooltip />
-                      <Legend />
-                      <Bar dataKey="conversions" fill="#000000" name="Conversions" />
-                      <Bar dataKey="meetings" fill="#6B7280" name="Meetings" />
-                      <Bar dataKey="calls" fill="#D1D5DB" name="Calls" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" className="text-xs" />
+                      <YAxis className="text-xs" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Bar dataKey="conversions" fill="var(--color-conversions)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="meetings" fill="var(--color-meetings)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="calls" fill="var(--color-calls)" radius={[4, 4, 0, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </DashboardCard>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
 
               {/* Contact Method Success */}
-              <DashboardCard
-                title="Contact Method Success Rate"
-                description="Effectiveness by communication channel"
-                icon={Target}
-                tooltip="Which contact methods lead to better engagement"
-              >
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900">
+                      <Target className="h-4 w-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Contact Success Rate</CardTitle>
+                      <CardDescription className="text-xs">Effectiveness by channel</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={contactConfig} className="h-52">
                     <BarChart data={contactMethodData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis type="number" domain={[0, 100]} fontSize={12} />
-                      <YAxis dataKey="method" type="category" fontSize={11} width={80} />
-                      <RechartsTooltip formatter={(value) => [`${value}%`, 'Success Rate']} />
-                      <Bar dataKey="success" fill="#000000" radius={[0, 4, 4, 0]} />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis type="number" domain={[0, 100]} className="text-xs" unit="%" />
+                      <YAxis dataKey="method" type="category" className="text-xs" width={75} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="success" fill="var(--color-success)" radius={[0, 6, 6, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </DashboardCard>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* Investments Tab */}
-          <TabsContent value="investments" className="space-y-4">
-            <DashboardCard
-              title="Investment Product Popularity"
-              description="Client preferences across asset types"
-              icon={TrendingUp}
-              tooltip="Which investment products are most popular among your clients"
-            >
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
+          <TabsContent value="investments" className="space-y-6">
+            <Card className="shadow-md border-0">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900">
+                    <Layers className="h-4 w-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm">Investment Product Allocation</CardTitle>
+                    <CardDescription className="text-xs">Client portfolio distribution across asset types</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={investmentConfig} className="h-72">
+                  <PieChart>
                     <Pie
                       data={investmentPopularityData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
+                      outerRadius={110}
                       label={({ name, value }) => `${name}: ${value}%`}
                       labelLine={true}
                       dataKey="value"
                     >
                       {investmentPopularityData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <RechartsTooltip />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </div>
-            </DashboardCard>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Clients Tab */}
-          <TabsContent value="clients" className="space-y-4">
-            <DashboardCard
-              title="Client Segment Analysis"
-              description="AUM and performance by client tier"
-              icon={Users}
-              tooltip="How your clients are segmented and performing"
-            >
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={clientSegmentData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="segment" fontSize={11} />
-                    <YAxis 
-                      yAxisId="left" 
-                      fontSize={12} 
-                      tickFormatter={(v) => `$${(v/1000000).toFixed(1)}M`}
-                    />
-                    <YAxis 
-                      yAxisId="right" 
-                      orientation="right" 
-                      fontSize={12}
-                      tickFormatter={(v) => `${v}%`}
-                    />
-                    <RechartsTooltip 
-                      formatter={(value, name) => {
-                        const numValue = Number(value);
-                        if (name === 'AUM') return [`$${(numValue/1000000).toFixed(2)}M`, name];
-                        if (name === 'Avg Return') return [`${numValue}%`, name];
-                        return [value, name];
-                      }}
-                    />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="aum" fill="#000000" name="AUM" />
-                    <Bar yAxisId="right" dataKey="avgReturn" fill="#9CA3AF" name="Avg Return" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </DashboardCard>
+          <TabsContent value="clients" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Client Segments */}
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900">
+                      <Users className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Client Segment Analysis</CardTitle>
+                      <CardDescription className="text-xs">AUM by client tier (millions)</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={clientSegmentData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="segment" className="text-xs" tick={{ fontSize: 10 }} />
+                        <YAxis className="text-xs" tickFormatter={(v) => `$${v}M`} />
+                        <Bar dataKey="aum" radius={[6, 6, 0, 0]}>
+                          {clientSegmentData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Goal Completion */}
+              <Card className="shadow-md border-0">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900">
+                      <Target className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Goal Completion</CardTitle>
+                      <CardDescription className="text-xs">Quarterly target progress</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadialBarChart 
+                        cx="50%" 
+                        cy="50%" 
+                        innerRadius="20%" 
+                        outerRadius="90%" 
+                        data={goalCompletionData}
+                        startAngle={90}
+                        endAngle={-270}
+                      >
+                        <RadialBar
+                          background
+                          dataKey="value"
+                          cornerRadius={6}
+                        />
+                        <Legend 
+                          iconSize={10}
+                          layout="horizontal"
+                          verticalAlign="bottom"
+                          formatter={(value) => <span className="text-xs">{value}</span>}
+                        />
+                      </RadialBarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
-
-        {/* Tableau Embed Placeholder */}
-        <div className="mt-6 p-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-          <div className="text-center text-gray-500">
-            <BarChart3 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm font-medium">Tableau Embed Ready</p>
-            <p className="text-xs mt-1">
-              Replace with Tableau JS API embed using your Tableau Public/Server dashboard URL
-            </p>
-            <code className="text-xs bg-white px-2 py-1 rounded border mt-2 inline-block">
-              {'<tableau-viz id="viz" src="YOUR_TABLEAU_URL" />'}
-            </code>
-          </div>
-        </div>
       </CardContent>
+
+      <CardFooter className="border-t bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Globe className="h-3.5 w-3.5" />
+          <span>Data refreshed every 30 seconds</span>
+        </div>
+        <Badge variant="outline" className="text-xs">
+          Mock Data Mode
+        </Badge>
+      </CardFooter>
     </Card>
   );
 }
