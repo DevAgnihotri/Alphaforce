@@ -1,3 +1,4 @@
+````markdown
 # AlphaForce - Sales Intelligence & Advisor Copilot
 
 <div align="center">
@@ -234,3 +235,34 @@ This project is for demonstration purposes.
 ## 👤 Author
 
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS.
+
+---
+
+## 🖼️ Screenshots
+
+Below are screenshots from the app (images are in the `screenshots/` folder):
+
+- **AlphaDesk**  
+  ![AlphaDesk](screenshots/AlphaDesk.png)
+
+- **Analytics**  
+  ![Analytics](screenshots/Analytics.png)
+
+- **Clients**  
+  ![Clients](screenshots/Clients.png)
+
+- **Dashboard**  
+  ![Dashboard](screenshots/Dashboard.png)
+
+- **Insights**  
+  ![Insights](screenshots/Insights.png)
+
+- **Landing Page (v2)**  
+  ![LandingPage2](screenshots/LandingPage2.png)
+
+- **Main Landing Page**  
+  ![MainLandingPage](screenshots/MainLandingPage.png)
+
+- **Product Tour**  
+  ![Tour](screenshots/Tour.png)
+````
