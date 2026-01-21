@@ -241,6 +241,19 @@ Built with ❤️ using Next.js, TypeScript, and Tailwind CSS.
 
 Below are screenshots from the app (images are in the `screenshots/` folder):
 
+
+- **Main Landing Page**  
+  ![MainLandingPage](screenshots/MainLandingPage.png)
+
+- **Landing Page (v2)**  
+  ![LandingPage2](screenshots/LandingPage2.png)
+
+- **Product Tour**  
+  ![Tour](screenshots/Tour.png)
+  
+- **Dashboard**  
+  ![Dashboard](screenshots/Dashboard.png)
+
 - **AlphaDesk**  
   ![AlphaDesk](screenshots/AlphaDesk.png)
 
@@ -250,17 +263,6 @@ Below are screenshots from the app (images are in the `screenshots/` folder):
 - **Clients**  
   ![Clients](screenshots/Clients.png)
 
-- **Dashboard**  
-  ![Dashboard](screenshots/Dashboard.png)
-
 - **Insights**  
   ![Insights](screenshots/Insights.png)
 
-- **Landing Page (v2)**  
-  ![LandingPage2](screenshots/LandingPage2.png)
-
-- **Main Landing Page**  
-  ![MainLandingPage](screenshots/MainLandingPage.png)
-
-- **Product Tour**  
-  ![Tour](screenshots/Tour.png)
