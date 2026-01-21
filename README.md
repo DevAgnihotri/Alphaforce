@@ -16,6 +16,35 @@
 
 AlphaForce is a comprehensive sales intelligence and advisor copilot platform designed for financial advisors. It helps prioritize client outreach, track interactions, analyze performance metrics, and generate professional PDF reports.
 
+## 🖼️ Screenshots
+
+Below are screenshots from the app (images are in the `screenshots/` folder):
+
+
+- **Main Landing Page**  
+  ![MainLandingPage](screenshots/MainLandingPage.png)
+
+- **Landing Page (v2)**  
+  ![LandingPage2](screenshots/LandingPage2.png)
+
+- **Product Tour**  
+  ![Tour](screenshots/Tour.png)
+  
+- **Dashboard**  
+  ![Dashboard](screenshots/Dashboard.png)
+
+- **AlphaDesk**  
+  ![AlphaDesk](screenshots/AlphaDesk.png)
+
+- **Analytics**  
+  ![Analytics](screenshots/Analytics.png)
+
+- **Clients**  
+  ![Clients](screenshots/Clients.png)
+
+- **Insights**  
+  ![Insights](screenshots/Insights.png)
+
 ### Key Features
 
 - **🎯 Smart Task Prioritization** - ML-powered scoring to identify high-priority clients
@@ -236,33 +265,4 @@ This project is for demonstration purposes.
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS.
 
 ---
-
-## 🖼️ Screenshots
-
-Below are screenshots from the app (images are in the `screenshots/` folder):
-
-
-- **Main Landing Page**  
-  ![MainLandingPage](screenshots/MainLandingPage.png)
-
-- **Landing Page (v2)**  
-  ![LandingPage2](screenshots/LandingPage2.png)
-
-- **Product Tour**  
-  ![Tour](screenshots/Tour.png)
-  
-- **Dashboard**  
-  ![Dashboard](screenshots/Dashboard.png)
-
-- **AlphaDesk**  
-  ![AlphaDesk](screenshots/AlphaDesk.png)
-
-- **Analytics**  
-  ![Analytics](screenshots/Analytics.png)
-
-- **Clients**  
-  ![Clients](screenshots/Clients.png)
-
-- **Insights**  
-  ![Insights](screenshots/Insights.png)
 
