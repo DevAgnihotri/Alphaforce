@@ -1,4 +1,3 @@
-````markdown
 # AlphaForce - Sales Intelligence & Advisor Copilot
 
 <div align="center">
@@ -265,4 +264,3 @@ Below are screenshots from the app (images are in the `screenshots/` folder):
 
 - **Product Tour**  
   ![Tour](screenshots/Tour.png)
-````
